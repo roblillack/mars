@@ -1,6 +1,7 @@
 package pathtree
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -68,6 +69,68 @@ func TestMixedTree(t *testing.T) {
 	notfound(t, n, "")
 	notfound(t, n, "xyz")
 	notfound(t, n, "/path//to/nowhere")
+}
+
+func BenchmarkTree100(b *testing.B) {
+	n := New()
+	n.Add("/", "root")
+
+	// Exact matches
+	for i := 0; i < 100; i++ {
+		depth := i%5 + 1
+		key := ""
+		for j := 0; j < depth-1; j++ {
+			key += fmt.Sprintf("/dir%d", j)
+		}
+		key += fmt.Sprintf("/resource%d", i)
+		n.Add(key, "literal")
+		// b.Logf("Adding %s", key)
+	}
+
+	// Wildcards at each level if no exact matches work.
+	for i := 0; i < 5; i++ {
+		var key string
+		for j := 0; j < i; j++ {
+			key += fmt.Sprintf("/dir%d", j)
+		}
+		key += "/:var"
+		n.Add(key, "var")
+		// b.Logf("Adding %s", key)
+	}
+
+	n.Add("/public/*filepath", "static")
+	// b.Logf("Adding /public/*filepath")
+
+	queries := map[string]string{
+		"/": "root",
+		"/dir0/dir1/dir2/dir3/resource4":    "literal",
+		"/dir0/dir1/resource97":             "literal",
+		"/dir0/variable":                    "var",
+		"/dir0/dir1/dir2/dir3/variable":     "var",
+		"/public/stylesheets/main.css":      "static",
+		"/public/images/icons/an-image.png": "static",
+	}
+
+	for query, answer := range queries {
+		leaf, _ := n.Find(query)
+		if leaf == nil {
+			b.Errorf("Failed to find leaf for querY %s", query)
+			return
+		}
+		if leaf.Value.(string) != answer {
+			b.Errorf("Incorrect answer for querY %s: expected: %s, actual: %s",
+				query, answer, leaf.Value.(string))
+			return
+		}
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N/len(queries); i++ {
+		for k, _ := range queries {
+			n.Find(k)
+		}
+	}
 }
 
 func notfound(t *testing.T, n *Node, p string) {
