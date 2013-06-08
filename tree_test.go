@@ -5,7 +5,44 @@ import (
 	"testing"
 )
 
-func TestTree(t *testing.T) {
+func TestColon(t *testing.T) {
+	n := New()
+
+	n.Add("/:first/:second/", 1)
+	n.Add("/:first", 2)
+	n.Add("/", 3)
+
+	found(t, n, "/", nil, 3)
+	found(t, n, "/a", []string{"a"}, 2)
+	found(t, n, "/a/", []string{"a"}, 2)
+	found(t, n, "/a/b", []string{"a", "b"}, 1)
+	found(t, n, "/a/b/", []string{"a", "b"}, 1)
+
+	notfound(t, n, "/a/b/c")
+}
+
+func TestStar(t *testing.T) {
+	n := New()
+
+	n.Add("/first/second/*star", 1)
+	n.Add("/:first/*star/", 2)
+	n.Add("/*star", 3)
+	n.Add("/", 4)
+
+	found(t, n, "/", nil, 4)
+	found(t, n, "/a", []string{"a"}, 3)
+	found(t, n, "/a/", []string{"a"}, 3)
+	found(t, n, "/a/b", []string{"a", "b"}, 2)
+	found(t, n, "/a/b/", []string{"a", "b"}, 2)
+	found(t, n, "/a/b/c", []string{"a", "b/c"}, 2)
+	found(t, n, "/a/b/c/", []string{"a", "b/c"}, 2)
+	found(t, n, "/a/b/c/d", []string{"a", "b/c/d"}, 2)
+	found(t, n, "/first/second", []string{"first", "second"}, 2)
+	found(t, n, "/first/second/", []string{"first", "second"}, 2)
+	found(t, n, "/first/second/third", []string{"third"}, 1)
+}
+
+func TestMixedTree(t *testing.T) {
 	n := New()
 
 	n.Add("/", 0)
@@ -46,9 +83,9 @@ func found(t *testing.T, n *Node, p string, expectedExpansions []string, val int
 		return
 	}
 	if !reflect.DeepEqual(expansions, expectedExpansions) {
-		t.Errorf("Wildcard expansions (actual) %v != %v (expected)", expansions, expectedExpansions)
+		t.Errorf("%s: Wildcard expansions (actual) %v != %v (expected)", p, expansions, expectedExpansions)
 	}
 	if leaf.Value != val {
-		t.Errorf("Value (actual) %v != %v (expected)", leaf.Value, val)
+		t.Errorf("%s: Value (actual) %v != %v (expected)", p, leaf.Value, val)
 	}
 }
