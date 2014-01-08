@@ -71,6 +71,11 @@ func TestMixedTree(t *testing.T) {
 	notfound(t, n, "/path//to/nowhere")
 }
 
+func TestErrors(t *testing.T) {
+	n := New()
+	fails(t, n.Add("//", 1), "empty path elements not allowed")
+}
+
 func BenchmarkTree100(b *testing.B) {
 	n := New()
 	n.Add("/", "root")
@@ -150,5 +155,11 @@ func found(t *testing.T, n *Node, p string, expectedExpansions []string, val int
 	}
 	if leaf.Value != val {
 		t.Errorf("%s: Value (actual) %v != %v (expected)", p, leaf.Value, val)
+	}
+}
+
+func fails(t *testing.T, err error, msg string) {
+	if err == nil {
+		t.Errorf("expected an error. %s", msg)
 	}
 }

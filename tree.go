@@ -58,7 +58,7 @@ func New() *Node {
 //   - key must not duplicate any existing key.
 // Returns an error if those conditions do not hold.
 func (n *Node) Add(key string, val interface{}) error {
-	if key[0] != '/' {
+	if key == "" || key[0] != '/' {
 		return errors.New("Path must begin with /")
 	}
 	n.leafs++
@@ -80,6 +80,9 @@ func (n *Node) add(order int, elements, wildcards []string, val interface{}) err
 
 	var el string
 	el, elements = elements[0], elements[1:]
+	if el == "" {
+		return errors.New("empty path elements are not allowed")
+	}
 
 	// Handle wildcards.
 	switch el[0] {
