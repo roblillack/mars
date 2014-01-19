@@ -16,6 +16,12 @@
 //   - *var - names beginning with '*' will match one or more path elements.
 //            (however, no path elements may come after a star wildcard)
 //
+// Extensions
+//
+// Single element wildcards in the last path element can optionally end with an
+// extension. This allows for routes like '/users/:id.json', which will not
+// conflict with '/users/:id'.
+//
 // Algorithm
 //
 // Paths are mapped to the tree in the following way:
@@ -38,7 +44,7 @@ type Node struct {
 	edges      map[string]*Node // the various path elements leading out of this node.
 	wildcard   *Node            // if set, this node had a wildcard as its path element.
 	leaf       *Leaf            // if set, this is a terminal node for this leaf.
-	extensions map[string]*Leaf // if set, this path ends in a specific extension.
+	extensions map[string]*Leaf // if set, this is a terminal node with a leaf that ends in a specific extension.
 	star       *Leaf            // if set, this path ends in a star.
 	leafs      int              // counter for # leafs in the tree
 }
