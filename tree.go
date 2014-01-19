@@ -35,11 +35,12 @@ import (
 )
 
 type Node struct {
-	edges    map[string]*Node // the various path elements leading out of this node.
-	wildcard *Node            // if set, this node had a wildcard as its path element.
-	leaf     *Leaf            // if set, this is a terminal node for this leaf.
-	star     *Leaf            // if set, this path ends in a star.
-	leafs    int              // counter for # leafs in the tree
+	edges      map[string]*Node // the various path elements leading out of this node.
+	wildcard   *Node            // if set, this node had a wildcard as its path element.
+	leaf       *Leaf            // if set, this is a terminal node for this leaf.
+	extensions map[string]*Leaf // if set, this path ends in a specific extension.
+	star       *Leaf            // if set, this path ends in a star.
+	leafs      int              // counter for # leafs in the tree
 }
 
 type Leaf struct {
@@ -67,14 +68,30 @@ func (n *Node) Add(key string, val interface{}) error {
 
 func (n *Node) add(order int, elements, wildcards []string, val interface{}) error {
 	if len(elements) == 0 {
-		if n.leaf != nil {
-			return errors.New("duplicate path")
-		}
-		n.leaf = &Leaf{
+		leaf := &Leaf{
 			order:     order,
 			Value:     val,
 			Wildcards: wildcards,
 		}
+		if len(wildcards) > 0 {
+			lastWildcard := wildcards[len(wildcards)-1]
+			extension, splitPosition := extensionForPath(lastWildcard)
+			if extension != "" {
+				wildcards[len(wildcards)-1] = lastWildcard[0:splitPosition]
+				if n.extensions == nil {
+					n.extensions = make(map[string]*Leaf)
+				}
+				if n.extensions[extension] != nil {
+					return errors.New("duplicate path")
+				}
+				n.extensions[extension] = leaf
+				return nil
+			}
+		}
+		if n.leaf != nil {
+			return errors.New("duplicate path")
+		}
+		n.leaf = leaf
 		return nil
 	}
 
@@ -125,6 +142,16 @@ func (n *Node) Find(key string) (leaf *Leaf, expansions []string) {
 
 func (n *Node) find(elements, exp []string) (leaf *Leaf, expansions []string) {
 	if len(elements) == 0 {
+		if exp != nil && len(exp) > 0 && n.extensions != nil {
+			lastExp := exp[len(exp)-1]
+			extension, splitPosition := extensionForPath(lastExp)
+			if extension != "" {
+				if leaf := n.extensions[extension]; leaf != nil {
+					exp[len(exp)-1] = lastExp[0:splitPosition]
+					return leaf, exp
+				}
+			}
+		}
 		return n.leaf, exp
 	}
 
@@ -157,6 +184,14 @@ func (n *Node) find(elements, exp []string) (leaf *Leaf, expansions []string) {
 	}
 
 	return
+}
+
+func extensionForPath(path string) (string, int) {
+	dotPosition := strings.Index(path, ".")
+	if dotPosition != -1 {
+		return path[dotPosition:], dotPosition
+	}
+	return "", -1
 }
 
 func splitPath(key string) []string {
