@@ -72,6 +72,28 @@ func (n *Node) Add(key string, val interface{}) error {
 	return n.add(n.leafs, splitPath(key), nil, val)
 }
 
+// Adds a leaf to a terminal node.
+// If the last wildcard contains an extension, add it to the 'extensions' map.
+func (n *Node) addLeaf(leaf *Leaf) error {
+	extension := stripExtensionFromSegments(leaf.Wildcards)
+	if extension != "" {
+		if n.extensions == nil {
+			n.extensions = make(map[string]*Leaf)
+		}
+		if n.extensions[extension] != nil {
+			return errors.New("duplicate path")
+		}
+		n.extensions[extension] = leaf
+		return nil
+	}
+
+	if n.leaf != nil {
+		return errors.New("duplicate path")
+	}
+	n.leaf = leaf
+	return nil
+}
+
 func (n *Node) add(order int, elements, wildcards []string, val interface{}) error {
 	if len(elements) == 0 {
 		leaf := &Leaf{
@@ -79,26 +101,7 @@ func (n *Node) add(order int, elements, wildcards []string, val interface{}) err
 			Value:     val,
 			Wildcards: wildcards,
 		}
-		if len(wildcards) > 0 {
-			lastWildcard := wildcards[len(wildcards)-1]
-			extension, splitPosition := extensionForPath(lastWildcard)
-			if extension != "" {
-				wildcards[len(wildcards)-1] = lastWildcard[0:splitPosition]
-				if n.extensions == nil {
-					n.extensions = make(map[string]*Leaf)
-				}
-				if n.extensions[extension] != nil {
-					return errors.New("duplicate path")
-				}
-				n.extensions[extension] = leaf
-				return nil
-			}
-		}
-		if n.leaf != nil {
-			return errors.New("duplicate path")
-		}
-		n.leaf = leaf
-		return nil
+		return n.addLeaf(leaf)
 	}
 
 	var el string
@@ -148,14 +151,13 @@ func (n *Node) Find(key string) (leaf *Leaf, expansions []string) {
 
 func (n *Node) find(elements, exp []string) (leaf *Leaf, expansions []string) {
 	if len(elements) == 0 {
-		if exp != nil && len(exp) > 0 && n.extensions != nil {
+		// If this node has explicit extensions, check if the path matches one.
+		if len(exp) > 0 && n.extensions != nil {
 			lastExp := exp[len(exp)-1]
 			extension, splitPosition := extensionForPath(lastExp)
-			if extension != "" {
-				if leaf := n.extensions[extension]; leaf != nil {
-					exp[len(exp)-1] = lastExp[0:splitPosition]
-					return leaf, exp
-				}
+			if leaf := n.extensions[extension]; leaf != nil {
+				exp[len(exp)-1] = lastExp[0:splitPosition]
+				return leaf, exp
 			}
 		}
 		return n.leaf, exp
@@ -209,4 +211,18 @@ func splitPath(key string) []string {
 		elements = elements[:len(elements)-1]
 	}
 	return elements
+}
+
+// stripExtensionFromSegments determines if a string slice representing a path
+// ends with a file extension, removes the extension from the input, and returns it.
+func stripExtensionFromSegments(segments []string) string {
+	if len(segments) == 0 {
+		return ""
+	}
+	lastSegment := segments[len(segments)-1]
+	extension, splitPosition := extensionForPath(lastSegment)
+	if extension != "" {
+		segments[len(segments)-1] = lastSegment[0:splitPosition]
+	}
+	return extension
 }

@@ -73,19 +73,10 @@ func TestMixedTree(t *testing.T) {
 
 func TestExtensions(t *testing.T) {
 	n := New()
-	var err error
 
 	n.Add("/:first/:second.json", 1)
-
-	err = n.Add("/a/:second.xml", 2)
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-	}
-
-	err = n.Add("/:first/:second", 3)
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-	}
+	n.Add("/a/:second.xml", 2)
+	n.Add("/:first/:second", 3)
 
 	found(t, n, "/a/b", []string{"a", "b"}, 3)
 	found(t, n, "/a/b.json", []string{"a", "b"}, 1)
