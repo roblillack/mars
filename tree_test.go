@@ -81,6 +81,7 @@ func TestExtensions(t *testing.T) {
 	found(t, n, "/a/b", []string{"a", "b"}, 3)
 	found(t, n, "/a/b.json", []string{"a", "b"}, 1)
 	found(t, n, "/a/b.xml", []string{"b"}, 2)
+	found(t, n, "/a/b.c.xml", []string{"b.c"}, 2)
 	found(t, n, "/other/b.xml", []string{"other", "b.xml"}, 3)
 }
 

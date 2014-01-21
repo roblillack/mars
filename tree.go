@@ -75,7 +75,7 @@ func (n *Node) Add(key string, val interface{}) error {
 // Adds a leaf to a terminal node.
 // If the last wildcard contains an extension, add it to the 'extensions' map.
 func (n *Node) addLeaf(leaf *Leaf) error {
-	extension := stripExtensionFromSegments(leaf.Wildcards)
+	extension := stripExtensionFromLastSegment(leaf.Wildcards)
 	if extension != "" {
 		if n.extensions == nil {
 			n.extensions = make(map[string]*Leaf)
@@ -154,9 +154,9 @@ func (n *Node) find(elements, exp []string) (leaf *Leaf, expansions []string) {
 		// If this node has explicit extensions, check if the path matches one.
 		if len(exp) > 0 && n.extensions != nil {
 			lastExp := exp[len(exp)-1]
-			extension, splitPosition := extensionForPath(lastExp)
+			prefix, extension := extensionForPath(lastExp)
 			if leaf := n.extensions[extension]; leaf != nil {
-				exp[len(exp)-1] = lastExp[0:splitPosition]
+				exp[len(exp)-1] = prefix
 				return leaf, exp
 			}
 		}
@@ -194,12 +194,12 @@ func (n *Node) find(elements, exp []string) (leaf *Leaf, expansions []string) {
 	return
 }
 
-func extensionForPath(path string) (string, int) {
-	dotPosition := strings.Index(path, ".")
+func extensionForPath(path string) (string, string) {
+	dotPosition := strings.LastIndex(path, ".")
 	if dotPosition != -1 {
-		return path[dotPosition:], dotPosition
+		return path[:dotPosition], path[dotPosition:]
 	}
-	return "", -1
+	return "", ""
 }
 
 func splitPath(key string) []string {
@@ -213,16 +213,16 @@ func splitPath(key string) []string {
 	return elements
 }
 
-// stripExtensionFromSegments determines if a string slice representing a path
+// stripExtensionFromLastSegment determines if a string slice representing a path
 // ends with a file extension, removes the extension from the input, and returns it.
-func stripExtensionFromSegments(segments []string) string {
+func stripExtensionFromLastSegment(segments []string) string {
 	if len(segments) == 0 {
 		return ""
 	}
 	lastSegment := segments[len(segments)-1]
-	extension, splitPosition := extensionForPath(lastSegment)
+	prefix, extension := extensionForPath(lastSegment)
 	if extension != "" {
-		segments[len(segments)-1] = lastSegment[0:splitPosition]
+		segments[len(segments)-1] = prefix
 	}
 	return extension
 }
