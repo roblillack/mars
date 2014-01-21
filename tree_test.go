@@ -71,6 +71,20 @@ func TestMixedTree(t *testing.T) {
 	notfound(t, n, "/path//to/nowhere")
 }
 
+func TestExtensions(t *testing.T) {
+	n := New()
+
+	n.Add("/:first/:second.json", 1)
+	n.Add("/a/:second.xml", 2)
+	n.Add("/:first/:second", 3)
+
+	found(t, n, "/a/b", []string{"a", "b"}, 3)
+	found(t, n, "/a/b.json", []string{"a", "b"}, 1)
+	found(t, n, "/a/b.xml", []string{"b"}, 2)
+	found(t, n, "/a/b.c.xml", []string{"b.c"}, 2)
+	found(t, n, "/other/b.xml", []string{"other", "b.xml"}, 3)
+}
+
 func TestErrors(t *testing.T) {
 	n := New()
 	fails(t, n.Add("//", 1), "empty path elements not allowed")

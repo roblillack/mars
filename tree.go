@@ -16,6 +16,12 @@
 //   - *var - names beginning with '*' will match one or more path elements.
 //            (however, no path elements may come after a star wildcard)
 //
+// Extensions
+//
+// Single element wildcards in the last path element can optionally end with an
+// extension. This allows for routes like '/users/:id.json', which will not
+// conflict with '/users/:id'.
+//
 // Algorithm
 //
 // Paths are mapped to the tree in the following way:
@@ -35,11 +41,12 @@ import (
 )
 
 type Node struct {
-	edges    map[string]*Node // the various path elements leading out of this node.
-	wildcard *Node            // if set, this node had a wildcard as its path element.
-	leaf     *Leaf            // if set, this is a terminal node for this leaf.
-	star     *Leaf            // if set, this path ends in a star.
-	leafs    int              // counter for # leafs in the tree
+	edges      map[string]*Node // the various path elements leading out of this node.
+	wildcard   *Node            // if set, this node had a wildcard as its path element.
+	leaf       *Leaf            // if set, this is a terminal node for this leaf.
+	extensions map[string]*Leaf // if set, this is a terminal node with a leaf that ends in a specific extension.
+	star       *Leaf            // if set, this path ends in a star.
+	leafs      int              // counter for # leafs in the tree
 }
 
 type Leaf struct {
@@ -65,17 +72,36 @@ func (n *Node) Add(key string, val interface{}) error {
 	return n.add(n.leafs, splitPath(key), nil, val)
 }
 
-func (n *Node) add(order int, elements, wildcards []string, val interface{}) error {
-	if len(elements) == 0 {
-		if n.leaf != nil {
+// Adds a leaf to a terminal node.
+// If the last wildcard contains an extension, add it to the 'extensions' map.
+func (n *Node) addLeaf(leaf *Leaf) error {
+	extension := stripExtensionFromLastSegment(leaf.Wildcards)
+	if extension != "" {
+		if n.extensions == nil {
+			n.extensions = make(map[string]*Leaf)
+		}
+		if n.extensions[extension] != nil {
 			return errors.New("duplicate path")
 		}
-		n.leaf = &Leaf{
+		n.extensions[extension] = leaf
+		return nil
+	}
+
+	if n.leaf != nil {
+		return errors.New("duplicate path")
+	}
+	n.leaf = leaf
+	return nil
+}
+
+func (n *Node) add(order int, elements, wildcards []string, val interface{}) error {
+	if len(elements) == 0 {
+		leaf := &Leaf{
 			order:     order,
 			Value:     val,
 			Wildcards: wildcards,
 		}
-		return nil
+		return n.addLeaf(leaf)
 	}
 
 	var el string
@@ -125,6 +151,15 @@ func (n *Node) Find(key string) (leaf *Leaf, expansions []string) {
 
 func (n *Node) find(elements, exp []string) (leaf *Leaf, expansions []string) {
 	if len(elements) == 0 {
+		// If this node has explicit extensions, check if the path matches one.
+		if len(exp) > 0 && n.extensions != nil {
+			lastExp := exp[len(exp)-1]
+			prefix, extension := extensionForPath(lastExp)
+			if leaf := n.extensions[extension]; leaf != nil {
+				exp[len(exp)-1] = prefix
+				return leaf, exp
+			}
+		}
 		return n.leaf, exp
 	}
 
@@ -159,6 +194,14 @@ func (n *Node) find(elements, exp []string) (leaf *Leaf, expansions []string) {
 	return
 }
 
+func extensionForPath(path string) (string, string) {
+	dotPosition := strings.LastIndex(path, ".")
+	if dotPosition != -1 {
+		return path[:dotPosition], path[dotPosition:]
+	}
+	return "", ""
+}
+
 func splitPath(key string) []string {
 	elements := strings.Split(key, "/")
 	if elements[0] == "" {
@@ -168,4 +211,18 @@ func splitPath(key string) []string {
 		elements = elements[:len(elements)-1]
 	}
 	return elements
+}
+
+// stripExtensionFromLastSegment determines if a string slice representing a path
+// ends with a file extension, removes the extension from the input, and returns it.
+func stripExtensionFromLastSegment(segments []string) string {
+	if len(segments) == 0 {
+		return ""
+	}
+	lastSegment := segments[len(segments)-1]
+	prefix, extension := extensionForPath(lastSegment)
+	if extension != "" {
+		segments[len(segments)-1] = prefix
+	}
+	return extension
 }
