@@ -2,8 +2,8 @@ package cache
 
 import (
 	"fmt"
-	"github.com/revel/revel"
 	"github.com/robfig/go-cache"
+	"github.com/roblillack/mars"
 	"reflect"
 	"time"
 )
@@ -28,8 +28,8 @@ func (c InMemoryCache) Get(key string, ptrValue interface{}) error {
 		return nil
 	}
 
-	err := fmt.Errorf("revel/cache: attempt to get %s, but can not set value %v", key, v)
-	revel.ERROR.Println(err)
+	err := fmt.Errorf("mars.cache: attempt to get %s, but can not set value %v", key, v)
+	mars.ERROR.Println(err)
 	return err
 }
 

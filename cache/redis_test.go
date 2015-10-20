@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"github.com/revel/revel"
+	"github.com/roblillack/mars"
 	"net"
 	"testing"
 	"time"
@@ -11,7 +11,7 @@ import (
 const redisTestServer = "localhost:6379"
 
 var newRedisCache = func(t *testing.T, defaultExpiration time.Duration) Cache {
-	revel.Config = revel.NewEmptyConfig()
+	mars.Config = mars.NewEmptyConfig()
 
 	c, err := net.Dial("tcp", redisTestServer)
 	if err == nil {

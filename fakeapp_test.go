@@ -1,4 +1,4 @@
-package revel
+package mars
 
 import (
 	"io/ioutil"
@@ -58,7 +58,7 @@ func (c Static) Serve(prefix, filepath string) Result {
 }
 
 func startFakeBookingApp() {
-	Init("prod", "github.com/revel/revel/testdata", "")
+	Init("prod", "github.com/roblillack/mars/testdata", "")
 
 	// Disable logging.
 	TRACE = log.New(ioutil.Discard, "", 0)

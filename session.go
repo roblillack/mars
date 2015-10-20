@@ -1,4 +1,4 @@
-package revel
+package mars
 
 import (
 	"crypto/rand"

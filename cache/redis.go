@@ -2,7 +2,7 @@ package cache
 
 import (
 	"github.com/garyburd/redigo/redis"
-	"github.com/revel/revel"
+	"github.com/roblillack/mars"
 	"time"
 )
 
@@ -15,14 +15,14 @@ type RedisCache struct {
 // until redigo supports sharding/clustering, only one host will be in hostList
 func NewRedisCache(host string, password string, defaultExpiration time.Duration) RedisCache {
 	var pool = &redis.Pool{
-		MaxIdle:     revel.Config.IntDefault("cache.redis.maxidle", 5),
-		MaxActive:   revel.Config.IntDefault("cache.redis.maxactive", 0),
-		IdleTimeout: time.Duration(revel.Config.IntDefault("cache.redis.idletimeout", 240)) * time.Second,
+		MaxIdle:     mars.Config.IntDefault("cache.redis.maxidle", 5),
+		MaxActive:   mars.Config.IntDefault("cache.redis.maxactive", 0),
+		IdleTimeout: time.Duration(mars.Config.IntDefault("cache.redis.idletimeout", 240)) * time.Second,
 		Dial: func() (redis.Conn, error) {
-			protocol := revel.Config.StringDefault("cache.redis.protocol", "tcp")
-			toc := time.Millisecond * time.Duration(revel.Config.IntDefault("cache.redis.timeout.connect", 10000))
-			tor := time.Millisecond * time.Duration(revel.Config.IntDefault("cache.redis.timeout.read", 5000))
-			tow := time.Millisecond * time.Duration(revel.Config.IntDefault("cache.redis.timeout.write", 5000))
+			protocol := mars.Config.StringDefault("cache.redis.protocol", "tcp")
+			toc := time.Millisecond * time.Duration(mars.Config.IntDefault("cache.redis.timeout.connect", 10000))
+			tor := time.Millisecond * time.Duration(mars.Config.IntDefault("cache.redis.timeout.read", 5000))
+			tow := time.Millisecond * time.Duration(mars.Config.IntDefault("cache.redis.timeout.write", 5000))
 			c, err := redis.DialTimeout(protocol, host, toc, tor, tow)
 			if err != nil {
 				return nil, err

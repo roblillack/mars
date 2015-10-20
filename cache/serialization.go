@@ -3,7 +3,7 @@ package cache
 import (
 	"bytes"
 	"encoding/gob"
-	"github.com/revel/revel"
+	"github.com/roblillack/mars"
 	"reflect"
 	"strconv"
 )
@@ -27,7 +27,7 @@ func Serialize(value interface{}) ([]byte, error) {
 	var b bytes.Buffer
 	encoder := gob.NewEncoder(&b)
 	if err := encoder.Encode(value); err != nil {
-		revel.ERROR.Printf("revel/cache: gob encoding '%s' failed: %s", value, err)
+		mars.ERROR.Printf("mars.cache: gob encoding '%s' failed: %s", value, err)
 		return nil, err
 	}
 	return b.Bytes(), nil
@@ -47,7 +47,7 @@ func Deserialize(byt []byte, ptr interface{}) (err error) {
 			var i int64
 			i, err = strconv.ParseInt(string(byt), 10, 64)
 			if err != nil {
-				revel.ERROR.Printf("revel/cache: failed to parse int '%s': %s", string(byt), err)
+				mars.ERROR.Printf("mars.cache: failed to parse int '%s': %s", string(byt), err)
 			} else {
 				p.SetInt(i)
 			}
@@ -57,7 +57,7 @@ func Deserialize(byt []byte, ptr interface{}) (err error) {
 			var i uint64
 			i, err = strconv.ParseUint(string(byt), 10, 64)
 			if err != nil {
-				revel.ERROR.Printf("revel/cache: failed to parse uint '%s': %s", string(byt), err)
+				mars.ERROR.Printf("mars.cache: failed to parse uint '%s': %s", string(byt), err)
 			} else {
 				p.SetUint(i)
 			}
@@ -68,7 +68,7 @@ func Deserialize(byt []byte, ptr interface{}) (err error) {
 	b := bytes.NewBuffer(byt)
 	decoder := gob.NewDecoder(b)
 	if err = decoder.Decode(ptr); err != nil {
-		revel.ERROR.Printf("revel/cache: gob decoding failed: %s", err)
+		mars.ERROR.Printf("mars.cache: gob decoding failed: %s", err)
 		return
 	}
 	return

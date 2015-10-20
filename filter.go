@@ -1,4 +1,4 @@
-package revel
+package mars
 
 type Filter func(c *Controller, filterChain []Filter)
 

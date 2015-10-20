@@ -16,7 +16,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/revel/revel"
+	"github.com/roblillack/mars"
 
 	"golang.org/x/net/websocket"
 )
@@ -25,7 +25,7 @@ type TestSuite struct {
 	Client       *http.Client
 	Response     *http.Response
 	ResponseBody []byte
-	Session      revel.Session
+	Session      mars.Session
 }
 
 type TestRequest struct {
@@ -41,7 +41,7 @@ func NewTestSuite() TestSuite {
 	jar, _ := cookiejar.New(nil)
 	return TestSuite{
 		Client:  &http.Client{Jar: jar},
-		Session: make(revel.Session),
+		Session: make(mars.Session),
 	}
 }
 
@@ -65,16 +65,16 @@ func (t *TestSuite) NewTestRequest(req *http.Request) *TestRequest {
 
 // Return the address and port of the server, e.g. "127.0.0.1:8557"
 func (t *TestSuite) Host() string {
-	if revel.Server.Addr[0] == ':' {
-		return "127.0.0.1" + revel.Server.Addr
+	if mars.Server.Addr[0] == ':' {
+		return "127.0.0.1" + mars.Server.Addr
 	}
-	return revel.Server.Addr
+	return mars.Server.Addr
 }
 
 // Return the base http/https URL of the server, e.g. "http://127.0.0.1:8557".
 // The scheme is set to https if http.ssl is set to true in the configuration file.
 func (t *TestSuite) BaseUrl() string {
-	if revel.HttpSsl {
+	if mars.HttpSsl {
 		return "https://" + t.Host()
 	} else {
 		return "http://" + t.Host()
@@ -233,7 +233,7 @@ func (r *TestRequest) MakeRequest() {
 	sessionCookieName := r.testSuite.Session.Cookie().Name
 	for _, cookie := range r.testSuite.Client.Jar.Cookies(r.Request.URL) {
 		if cookie.Name == sessionCookieName {
-			r.testSuite.Session = revel.GetSessionFromCookie(cookie)
+			r.testSuite.Session = mars.GetSessionFromCookie(cookie)
 			break
 		}
 	}
@@ -276,13 +276,13 @@ func (t *TestSuite) AssertHeader(name, value string) {
 }
 
 func (t *TestSuite) AssertEqual(expected, actual interface{}) {
-	if !revel.Equal(expected, actual) {
+	if !mars.Equal(expected, actual) {
 		panic(fmt.Errorf("(expected) %v != %v (actual)", expected, actual))
 	}
 }
 
 func (t *TestSuite) AssertNotEqual(expected, actual interface{}) {
-	if revel.Equal(expected, actual) {
+	if mars.Equal(expected, actual) {
 		panic(fmt.Errorf("(expected) %v == %v (actual)", expected, actual))
 	}
 }

@@ -1,4 +1,4 @@
-package revel
+package mars
 
 import (
 	"github.com/agtorre/gocolorize"
@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	REVEL_IMPORT_PATH = "github.com/revel/revel"
+	REVEL_IMPORT_PATH = "github.com/roblillack/mars"
 )
 
 type revelLogs struct {
