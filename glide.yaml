@@ -1,0 +1,28 @@
+package: mars
+
+import:
+  - package: golang.org/x/net
+    repo: https://github.com/golang/net
+    ref: ddbc69e05bd1d66853fca7216e1f380c3b8e4b25
+    vcs: git
+    subpackages: websocket
+  - package: github.com/agtorre/gocolorize
+    ref: f42b554bf7f006936130c9bb4f971afd2d87f671
+    vcs: git
+  - package: gopkg.in/fsnotify.v1
+    repo: https://github.com/go-fsnotify/fsnotify
+    ref: v1.2.1
+    vcs: git
+  - package: github.com/robfig/config
+    ref: 0f78529c8c7e3e9a25f15876532ecbc07c7d99e6
+    vcs: git
+  - package: github.com/robfig/pathtree
+    ref: 41257a1839e945fce74afd070e02bab2ea2c776a
+    vcs: git
+  - package: github.com/robfig/cron
+    ref: 67823cd24dece1b04cced3a0a0b3ca2bc84d875e
+    vcs: git
+  - package: github.com/revel/modules
+    ref: 3589d5bf1d1b6da10a88c53701db2af12dfc0811
+    vcs: git
+    subpackages: static
