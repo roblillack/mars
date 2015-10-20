@@ -310,10 +310,23 @@ func ResolveImportPath(importPath string) (string, error) {
 		return path.Join(SourcePath, importPath), nil
 	}
 
-	modPkg, err := build.Import(importPath, "", build.FindOnly)
+	// GO15VENDOREXPERIMENT
+	var err error
+	var modPkg *build.Package
+	for _, p := range []string{
+		importPath,
+		path.Join(ImportPath, "vendor", importPath),
+		path.Join(REVEL_IMPORT_PATH, "vendor", importPath)} {
+		modPkg, err = build.Import(p, "", build.FindOnly)
+		if err == nil {
+			break
+		}
+	}
+
 	if err != nil {
 		return "", err
 	}
+
 	return modPkg.Dir, nil
 }
 
