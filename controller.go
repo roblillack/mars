@@ -84,8 +84,6 @@ func (c *Controller) setStatusIfNil(status int) {
 // This action will render views/Users/ShowUser.html, passing in an extra
 // key-value "user": (User).
 func (c *Controller) Render(extraRenderArgs ...interface{}) Result {
-	c.setStatusIfNil(http.StatusOK)
-
 	// Get the calling function name.
 	_, _, line, ok := runtime.Caller(1)
 	if !ok {
@@ -113,13 +111,13 @@ func (c *Controller) Render(extraRenderArgs ...interface{}) Result {
 // A less magical way to render a template.
 // Renders the given template, using the current RenderArgs.
 func (c *Controller) RenderTemplate(templatePath string) Result {
-	c.setStatusIfNil(http.StatusOK)
-
 	// Get the Template.
 	template, err := MainTemplateLoader.Template(templatePath)
 	if err != nil {
 		return c.RenderError(err)
 	}
+
+	c.setStatusIfNil(http.StatusOK)
 
 	return &RenderTemplateResult{
 		Template:   template,
