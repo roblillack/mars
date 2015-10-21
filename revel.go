@@ -31,8 +31,6 @@ var (
 	AppName    string // e.g. "sample"
 	AppRoot    string // e.g. "/app1"
 	BasePath   string // e.g. "/Users/robfig/gocode/src/corp/sample"
-	AppPath    string // e.g. "/Users/robfig/gocode/src/corp/sample/app"
-	ViewsPath  string // e.g. "/Users/robfig/gocode/src/corp/sample/app/views"
 	ImportPath string // e.g. "corp/sample"
 
 	Config     *MergedConfig
@@ -42,9 +40,8 @@ var (
 
 	// Where to look for templates and configuration.
 	// Ordered by priority.  (Earlier paths take precedence over later paths.)
-	CodePaths     []string
-	ConfPaths     []string
-	TemplatePaths []string
+	CodePaths []string
+	ConfPaths []string
 
 	Modules []Module
 
@@ -110,12 +107,12 @@ func InitDefaults(mode, basePath string) {
 	}
 
 	BasePath = filepath.FromSlash(basePath)
-	AppPath = path.Join(BasePath, "app")
-	ViewsPath = path.Join(AppPath, "views")
-	CodePaths = []string{AppPath}
 	ConfPaths = []string{path.Join(BasePath, "conf")}
-	TemplatePaths = []string{ViewsPath}
 
+	/*
+		fmt.Println("RunMode", RunMode)
+		fmt.Println("BasePath", BasePath)
+	*/
 
 	// Load app.conf
 	var err error
@@ -124,10 +121,7 @@ func InitDefaults(mode, basePath string) {
 		log.Fatalln("Failed to load app.conf:", err)
 	}
 
-	MimeConfig, err = LoadConfig(path.Join(BasePath, "conf", "mime-types.conf"))
-	if err != nil {
-		ERROR.Fatalln("Failed to load mime type config:", err)
-	}
+	MimeConfig, _ = LoadConfig(path.Join(BasePath, "conf", "mime-types.conf"))
 
 	// Ensure that the selected runmode appears in app.conf.
 	// If empty string is passed as the mode, treat it as "DEFAULT"
@@ -274,9 +268,6 @@ func addModule(name, importPath, modulePath string) {
 	Modules = append(Modules, Module{Name: name, ImportPath: importPath, Path: modulePath})
 	if codePath := path.Join(modulePath, "app"); DirExists(codePath) {
 		CodePaths = append(CodePaths, codePath)
-		if viewsPath := path.Join(modulePath, "app", "views"); DirExists(viewsPath) {
-			TemplatePaths = append(TemplatePaths, viewsPath)
-		}
 	}
 
 	INFO.Print("Loaded module ", path.Base(modulePath))

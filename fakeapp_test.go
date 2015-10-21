@@ -66,9 +66,6 @@ func startFakeBookingApp() {
 	WARN = TRACE
 	ERROR = TRACE
 
-	MainTemplateLoader = NewTemplateLoader([]string{ViewsPath})
-	MainTemplateLoader.Refresh()
-
 	RegisterController((*Hotels)(nil),
 		[]*MethodType{
 			&MethodType{

@@ -91,10 +91,6 @@ func Run(port int) {
 
 	runStartupHooks()
 
-	// Load templates
-	MainTemplateLoader = NewTemplateLoader(TemplatePaths)
-	MainTemplateLoader.Refresh()
-
 	// The "watch" config variable can turn on and off all watching.
 	// (As a convenient way to control it all together.)
 	if Config.BoolDefault("watch", true) {
