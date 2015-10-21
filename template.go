@@ -1,5 +1,7 @@
 package mars
 
+//go:generate go-bindata -pkg $GOPACKAGE -prefix templates -o embedded_templates.go templates/errors/
+
 import (
 	"fmt"
 	"html"
@@ -426,6 +428,16 @@ func (loader *TemplateLoader) Template(name string) (Template, error) {
 	}
 
 	if tmpl == nil && err == nil {
+		WARN.Printf("Template %s not found.", name)
+		// No application-supplied template found? Use the embedded ones …
+		if data, dataErr := Asset(templateName); dataErr == nil {
+			WARN.Printf("Asset %s found.", templateName)
+
+			tmpl = template.New(templateName)
+			_, err := tmpl.Parse(string(data))
+			return GoTemplate{tmpl, loader}, err
+		}
+
 		return nil, fmt.Errorf("Template %s not found.", name)
 	}
 
