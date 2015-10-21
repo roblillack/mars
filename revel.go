@@ -1,7 +1,6 @@
 package mars
 
 import (
-	"fmt"
 	"github.com/agtorre/gocolorize"
 	"github.com/robfig/config"
 	"go/build"
