@@ -420,19 +420,6 @@ func (router *Router) Reverse(action string, argValues map[string]string) *Actio
 	return nil
 }
 
-func init() {
-	OnAppStart(func() {
-		MainRouter = NewRouter(path.Join(BasePath, "conf", "routes"))
-		err := MainRouter.Refresh()
-		if MainWatcher != nil && Config.BoolDefault("watch.routes", true) {
-			MainWatcher.Listen(MainRouter, MainRouter.path)
-		} else if err != nil {
-			// Not in dev mode and Route loading failed, we should crash.
-			ERROR.Panicln(err.Error())
-		}
-	})
-}
-
 func RouterFilter(c *Controller, fc []Filter) {
 	// Figure out the Controller/Action
 	var route *RouteMatch = MainRouter.Route(c.Request.Request)
