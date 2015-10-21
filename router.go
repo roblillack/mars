@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"path"
 	"regexp"
 	"strings"
 
@@ -187,19 +186,6 @@ func parseRoutes(routesPath, joinedPath, content string, validate bool) ([]*Rout
 			continue
 		}
 
-		const modulePrefix = "module:"
-
-		// Handle included routes from modules.
-		// e.g. "module:testrunner" imports all routes from that module.
-		if strings.HasPrefix(line, modulePrefix) {
-			moduleRoutes, err := getModuleRoutes(line[len(modulePrefix):], joinedPath, validate)
-			if err != nil {
-				return nil, routeError(err, routesPath, content, n)
-			}
-			routes = append(routes, moduleRoutes...)
-			continue
-		}
-
 		// A single route
 		method, path, action, fixedArgs, found := parseRouteLine(line)
 		if !found {
@@ -213,19 +199,6 @@ func parseRoutes(routesPath, joinedPath, content string, validate bool) ([]*Rout
 			joinedPath = joinedPath[0 : len(joinedPath)-1]
 		}
 		path = strings.Join([]string{AppRoot, joinedPath, path}, "")
-
-		// This will import the module routes under the path described in the
-		// routes file (joinedPath param). e.g. "* /jobs module:jobs" -> all
-		// routes' paths will have the path /jobs prepended to them.
-		// See #282 for more info
-		if method == "*" && strings.HasPrefix(action, modulePrefix) {
-			moduleRoutes, err := getModuleRoutes(action[len(modulePrefix):], path, validate)
-			if err != nil {
-				return nil, routeError(err, routesPath, content, n)
-			}
-			routes = append(routes, moduleRoutes...)
-			continue
-		}
 
 		route := NewRoute(method, path, action, fixedArgs, routesPath, n)
 		routes = append(routes, route)
@@ -288,19 +261,6 @@ func routeError(err error, routesPath, content string, n int) *Error {
 		Line:        n + 1,
 		SourceLines: strings.Split(content, "\n"),
 	}
-}
-
-// getModuleRoutes loads the routes file for the given module and returns the
-// list of routes.
-func getModuleRoutes(moduleName, joinedPath string, validate bool) ([]*Route, *Error) {
-	// Look up the module.  It may be not found due to the common case of e.g. the
-	// testrunner module being active only in dev mode.
-	module, found := ModuleByName(moduleName)
-	if !found {
-		INFO.Println("Skipping routes for inactive module", moduleName)
-		return nil, nil
-	}
-	return parseRoutesFile(path.Join(module.Path, "conf", "routes"), joinedPath, validate)
 }
 
 // Groups:

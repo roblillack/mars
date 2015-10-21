@@ -43,8 +43,6 @@ var (
 	CodePaths []string
 	ConfPaths []string
 
-	Modules []Module
-
 	// Server config.
 	//
 	// Alert: This is how the app is configured, which may be different from
@@ -170,7 +168,8 @@ func InitDefaults(mode, basePath string) {
 	WARN = getLogger("warn")
 	ERROR = getLogger("error")
 
-	loadModules()
+	MainTemplateLoader = NewTemplateLoader([]string{path.Join(BasePath, "views")})
+	MainTemplateLoader.Refresh()
 
 	Initialized = true
 	INFO.Printf("Initialized Mars v%s (%s) for %s", VERSION, BUILD_DATE, MINIMUM_GO)
@@ -222,25 +221,6 @@ func newLogger(wr io.Writer) *log.Logger {
 	return log.New(wr, "", INFO.Flags())
 }
 
-type Module struct {
-	Name, ImportPath, Path string
-}
-
-func loadModules() {
-	for _, key := range Config.Options("module.") {
-		moduleImportPath := Config.StringDefault(key, "")
-		if moduleImportPath == "" {
-			continue
-		}
-
-		modulePath, err := ResolveImportPath(moduleImportPath)
-		if err != nil {
-			log.Fatalln("Failed to load module.  Import of", moduleImportPath, "failed:", err)
-		}
-		addModule(key[len("module."):], moduleImportPath, modulePath)
-	}
-}
-
 // ResolveImportPath returns the filesystem path for the given import path.
 // Returns an error if the import path could not be found.
 func ResolveImportPath(importPath string) (string, error) {
@@ -262,31 +242,6 @@ func ResolveImportPath(importPath string) (string, error) {
 	}
 
 	return modPkg.Dir, nil
-}
-
-func addModule(name, importPath, modulePath string) {
-	Modules = append(Modules, Module{Name: name, ImportPath: importPath, Path: modulePath})
-	if codePath := path.Join(modulePath, "app"); DirExists(codePath) {
-		CodePaths = append(CodePaths, codePath)
-	}
-
-	INFO.Print("Loaded module ", path.Base(modulePath))
-
-	// Hack: There is presently no way for the testrunner module to add the
-	// "test" subdirectory to the CodePaths.  So this does it instead.
-	if importPath == Config.StringDefault("module.testrunner", "github.com/revel/modules/testrunner") {
-		CodePaths = append(CodePaths, path.Join(BasePath, "tests"))
-	}
-}
-
-// ModuleByName returns the module of the given name, if loaded.
-func ModuleByName(name string) (m Module, found bool) {
-	for _, module := range Modules {
-		if module.Name == name {
-			return module, true
-		}
-	}
-	return Module{}, false
 }
 
 func CheckInit() {

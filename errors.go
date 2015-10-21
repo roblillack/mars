@@ -110,11 +110,6 @@ func findRelevantStackFrame(stack string) (int, string) {
 	if frame := strings.Index(stack, BasePath); frame != -1 {
 		return frame, BasePath
 	}
-	for _, module := range Modules {
-		if frame := strings.Index(stack, module.Path); frame != -1 {
-			return frame, module.Path
-		}
-	}
 	return -1, ""
 }
 
