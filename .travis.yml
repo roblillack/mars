@@ -1,5 +1,6 @@
 language: go
 go: 1.5
+
 install:
   - export PATH=$PATH:$HOME/gopath/bin
   - export MARS_BRANCH="master"
@@ -7,5 +8,6 @@ install:
   - 'echo "Travis branch: $TRAVIS_BRANCH, Mars dependency branch: $MARS_BRANCH"'
   - go get -v github.com/masterminds/glide
   - glide up
+
 script:
   - go test github.com/roblillack/mars
