@@ -1,6 +1,7 @@
 package mars
 
 import (
+	"fmt"
 	"github.com/agtorre/gocolorize"
 	"github.com/robfig/config"
 	"go/build"
@@ -11,7 +12,6 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
-	"strings"
 )
 
 const (
@@ -35,14 +35,11 @@ var (
 	AppPath    string // e.g. "/Users/robfig/gocode/src/corp/sample/app"
 	ViewsPath  string // e.g. "/Users/robfig/gocode/src/corp/sample/app/views"
 	ImportPath string // e.g. "corp/sample"
-	SourcePath string // e.g. "/Users/robfig/gocode/src"
 
-	Config  *MergedConfig
-	RunMode string // Application-defined (by default, "dev" or "prod")
-	DevMode bool   // if true, RunMode is a development mode.
-
-	// Revel installation details
-	RevelPath string // e.g. "/Users/robfig/gocode/src/revel"
+	Config     *MergedConfig
+	MimeConfig *MergedConfig
+	RunMode    string // Application-defined (by default, "dev" or "prod")
+	DevMode    bool   // if true, RunMode is a development mode.
 
 	// Where to look for templates and configuration.
 	// Ordered by priority.  (Earlier paths take precedence over later paths.)
@@ -95,64 +92,44 @@ var (
 
 	// Private
 	secretKey []byte // Key used to sign cookies. An empty key disables signing.
-	packaged  bool   // If true, this is running from a pre-built package.
 )
 
 func init() {
 	log.SetFlags(INFO.Flags())
 }
 
-// Init initializes Revel -- it provides paths for getting around the app.
+// InitDefaults initializes Mars based on runtime-loading of config files.
 //
 // Params:
 //   mode - the run mode, which determines which app.conf settings are used.
-//   importPath - the Go import path of the application.
-//   srcPath - the path to the source directory, containing Revel and the app.
-//     If not specified (""), then a functioning Go installation is required.
-func Init(mode, importPath, srcPath string) {
-	// Ignore trailing slashes.
-	ImportPath = strings.TrimRight(importPath, "/")
-	SourcePath = srcPath
+//   basePath - the path to the configuration, messages, and view directories
+func InitDefaults(mode, basePath string) {
 	RunMode = mode
 
 	if runtime.GOOS == "windows" {
 		gocolorize.SetPlain(true)
 	}
 
-	// If the SourcePath is not specified, find it using build.Import.
-	var revelSourcePath string // may be different from the app source path
-	if SourcePath == "" {
-		revelSourcePath, SourcePath = findSrcPaths(importPath)
-	} else {
-		// If the SourcePath was specified, assume both Revel and the app are within it.
-		SourcePath = path.Clean(SourcePath)
-		revelSourcePath = SourcePath
-		packaged = true
-	}
-
-	RevelPath = path.Join(revelSourcePath, filepath.FromSlash(REVEL_IMPORT_PATH))
-	BasePath = path.Join(SourcePath, filepath.FromSlash(importPath))
+	BasePath = filepath.FromSlash(basePath)
 	AppPath = path.Join(BasePath, "app")
 	ViewsPath = path.Join(AppPath, "views")
-
 	CodePaths = []string{AppPath}
+	ConfPaths = []string{path.Join(BasePath, "conf")}
+	TemplatePaths = []string{ViewsPath}
 
-	ConfPaths = []string{
-		path.Join(BasePath, "conf"),
-		path.Join(RevelPath, "conf"),
-	}
-
-	TemplatePaths = []string{
-		ViewsPath,
-		path.Join(RevelPath, "templates"),
-	}
 
 	// Load app.conf
 	var err error
-	Config, err = LoadConfig("app.conf")
+	Config, err = LoadConfig(path.Join(BasePath, "conf", "app.conf"))
 	if err != nil || Config == nil {
 		log.Fatalln("Failed to load app.conf:", err)
 	}
+
+	MimeConfig, err = LoadConfig(path.Join(BasePath, "conf", "mime-types.conf"))
+	if err != nil {
+		ERROR.Fatalln("Failed to load mime type config:", err)
+	}
+
 	// Ensure that the selected runmode appears in app.conf.
 	// If empty string is passed as the mode, treat it as "DEFAULT"
 	if mode == "" {
@@ -252,38 +229,6 @@ func newLogger(wr io.Writer) *log.Logger {
 	return log.New(wr, "", INFO.Flags())
 }
 
-// findSrcPaths uses the "go/build" package to find the source root for Revel
-// and the app.
-func findSrcPaths(importPath string) (revelSourcePath, appSourcePath string) {
-	var (
-		gopaths = filepath.SplitList(build.Default.GOPATH)
-		goroot  = build.Default.GOROOT
-	)
-
-	if len(gopaths) == 0 {
-		ERROR.Fatalln("GOPATH environment variable is not set. ",
-			"Please refer to http://golang.org/doc/code.html to configure your Go environment.")
-	}
-
-	if ContainsString(gopaths, goroot) {
-		ERROR.Fatalf("GOPATH (%s) must not include your GOROOT (%s). "+
-			"Please refer to http://golang.org/doc/code.html to configure your Go environment.",
-			gopaths, goroot)
-	}
-
-	appPkg, err := build.Import(importPath, "", build.FindOnly)
-	if err != nil {
-		ERROR.Fatalln("Failed to import", importPath, "with error:", err)
-	}
-
-	revelPkg, err := build.Import(REVEL_IMPORT_PATH, "", build.FindOnly)
-	if err != nil {
-		ERROR.Fatalln("Failed to find Revel with error:", err)
-	}
-
-	return revelPkg.SrcRoot, appPkg.SrcRoot
-}
-
 type Module struct {
 	Name, ImportPath, Path string
 }
@@ -306,10 +251,6 @@ func loadModules() {
 // ResolveImportPath returns the filesystem path for the given import path.
 // Returns an error if the import path could not be found.
 func ResolveImportPath(importPath string) (string, error) {
-	if packaged {
-		return path.Join(SourcePath, importPath), nil
-	}
-
 	// GO15VENDOREXPERIMENT
 	var err error
 	var modPkg *build.Package

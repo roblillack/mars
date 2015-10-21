@@ -554,9 +554,6 @@ var defaultMimeTypes = map[string]string{
 
 const DefaultFileContentType = "application/octet-stream"
 
-// needs to be initialized if application ships with custom mime-types.conf
-var mimeConfig *MergedConfig
-
 // Returns a MIME content type based on the filename's extension.
 // If no appropriate one is found, returns "application/octet-stream" by default.
 // Additionally, specifies the charset as UTF-8 for text/* types.
@@ -568,8 +565,8 @@ func ContentTypeByFilename(filename string) string {
 
 	extension := filename[dot+1:]
 	var contentType string
-	if mimeConfig != nil {
-		contentType = mimeConfig.StringDefault(extension, "")
+	if MimeConfig != nil {
+		contentType = MimeConfig.StringDefault(extension, "")
 	}
 	if contentType == "" {
 		contentType = defaultMimeTypes[extension]

@@ -1,9 +1,7 @@
 package mars
 
 import (
-	"errors"
 	"github.com/robfig/config"
-	"path"
 	"strings"
 )
 
@@ -21,16 +19,11 @@ func NewEmptyConfig() *MergedConfig {
 }
 
 func LoadConfig(confName string) (*MergedConfig, error) {
-	var err error
-	for _, confPath := range ConfPaths {
-		conf, err := config.ReadDefault(path.Join(confPath, confName))
-		if err == nil {
-			return &MergedConfig{conf, ""}, nil
-		}
-	}
+	conf, err := config.ReadDefault(confName)
 	if err == nil {
-		err = errors.New("not found")
+		return &MergedConfig{conf, ""}, nil
 	}
+
 	return nil, err
 }
 

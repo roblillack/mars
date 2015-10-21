@@ -10,8 +10,7 @@ import (
 
 const (
 	testDataPath   string = "testdata/i18n"
-	testConfigPath string = "testdata/i18n/config"
-	testConfigName string = "test_app.conf"
+	testConfigName string = "testdata/i18n/config/test_app.conf"
 )
 
 func TestI18nLoadMessages(t *testing.T) {
@@ -170,7 +169,6 @@ func excludeFromTimer(b *testing.B, f func()) {
 }
 
 func loadTestI18nConfig(t *testing.T) {
-	ConfPaths = append(ConfPaths, testConfigPath)
 	testConfig, error := LoadConfig(testConfigName)
 	if error != nil {
 		t.Fatalf("Unable to load test config '%s': %s", testConfigName, error.Error())

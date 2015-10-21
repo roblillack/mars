@@ -58,7 +58,7 @@ func (c Static) Serve(prefix, filepath string) Result {
 }
 
 func startFakeBookingApp() {
-	Init("prod", "github.com/roblillack/mars/testdata", "")
+	InitDefaults("prod", "testdata")
 
 	// Disable logging.
 	TRACE = log.New(ioutil.Discard, "", 0)
