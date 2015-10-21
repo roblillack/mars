@@ -77,45 +77,6 @@ func ParseKeyValueCookie(val string, cb func(key, val string)) {
 	}
 }
 
-const DefaultFileContentType = "application/octet-stream"
-
-var mimeConfig *MergedConfig
-
-// Load mime-types.conf on init.
-func LoadMimeConfig() {
-	var err error
-	mimeConfig, err = LoadConfig("mime-types.conf")
-	if err != nil {
-		ERROR.Fatalln("Failed to load mime type config:", err)
-	}
-}
-
-func init() {
-	OnAppStart(LoadMimeConfig)
-}
-
-// Returns a MIME content type based on the filename's extension.
-// If no appropriate one is found, returns "application/octet-stream" by default.
-// Additionally, specifies the charset as UTF-8 for text/* types.
-func ContentTypeByFilename(filename string) string {
-	dot := strings.LastIndex(filename, ".")
-	if dot == -1 || dot+1 >= len(filename) {
-		return DefaultFileContentType
-	}
-
-	extension := filename[dot+1:]
-	contentType := mimeConfig.StringDefault(extension, "")
-	if contentType == "" {
-		return DefaultFileContentType
-	}
-
-	if strings.HasPrefix(contentType, "text/") {
-		return contentType + "; charset=utf-8"
-	}
-
-	return contentType
-}
-
 // DirExists returns true if the given path exists and is a directory.
 func DirExists(filename string) bool {
 	fileInfo, err := os.Stat(filename)
