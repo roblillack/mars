@@ -1,0 +1,31 @@
+[submodule "glide"]
+path = vendor/github.com/Masterminds/glide
+url = https://github.com/Masterminds/glide.git
+
+[submodule "net"]
+path = vendor/golang.org/x/net
+url = https://github.com/golang/net.git
+
+[submodule "gocolorize"]
+path = vendor/github.com/agtorre/gocolorize
+url = https://github.com/agtorre/gocolorize.git
+
+[submodule "fsnotify"]
+path = vendor/gopkg.in/fsnotify.v1
+url = https://github.com/go-fsnotify/fsnotify.git
+
+[submodule "config"]
+path = vendor/github.com/robfig/config
+url = https://github.com/robfig/config.git
+
+[submodule "pathtree"]
+path = vendor/github.com/robfig/pathtree
+url = https://github.com/robfig/pathtree.git
+
+[submodule "cron"]
+path = vendor/github.com/robfig/cron
+url = https://github.com/robfig/cron.git
+
+[submodule "modules"]
+path = vendor/github.com/revel/modules
+url = https://github.com/revel/modules.git
