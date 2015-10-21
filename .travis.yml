@@ -4,6 +4,7 @@ go: 1.5
 install:
   - export PATH=$PATH:$HOME/gopath/bin
   - export MARS_BRANCH="master"
+  - export GOVENDOREXPERIMENT=1
   - 'if [[ "$TRAVIS_BRANCH" == "master" ]]; then export MARS_BRANCH="master"; fi'
   - 'echo "Travis branch: $TRAVIS_BRANCH, Mars dependency branch: $MARS_BRANCH"'
   - go get -v github.com/masterminds/glide
