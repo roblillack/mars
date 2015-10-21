@@ -1,11 +1,11 @@
 package controllers
 
-import "github.com/revel/revel"
+import "github.com/roblillack/mars"
 
 type App struct {
-	*revel.Controller
+	*mars.Controller
 }
 
-func (c App) Index() revel.Result {
+func (c App) Index() mars.Result {
 	return c.Render()
 }

@@ -66,7 +66,7 @@ func startFakeBookingApp() {
 	WARN = TRACE
 	ERROR = TRACE
 
-	MainTemplateLoader = NewTemplateLoader([]string{ViewsPath, path.Join(RevelPath, "templates")})
+	MainTemplateLoader = NewTemplateLoader([]string{ViewsPath})
 	MainTemplateLoader.Refresh()
 
 	RegisterController((*Hotels)(nil),
@@ -100,6 +100,14 @@ func startFakeBookingApp() {
 				RenderArgNames: map[int][]string{},
 			},
 		})
+
+	MainRouter = NewRouter(path.Join(BasePath, "conf", "routes"))
+	err := MainRouter.Refresh()
+
+	if err != nil {
+		// Not in dev mode and Route loading failed, we should crash.
+		ERROR.Panicln(err.Error())
+	}
 
 	runStartupHooks()
 }
