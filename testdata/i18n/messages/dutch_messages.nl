@@ -1,6 +1,6 @@
 greeting=Hallo 
 greeting.name=Rob
-greeting.suffix=, welkom bij Revel!
+greeting.suffix=, welkom bij Mars!
 
 [NL]
 greeting=Goeiedag

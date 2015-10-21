@@ -31,7 +31,7 @@ type sourceLine struct {
 func NewErrorFromPanic(err interface{}) *Error {
 
 	// Parse the filename and line from the originating line of app code.
-	// /Users/robfig/code/gocode/src/revel/samples/booking/app/controllers/hotels.go:191 (0x44735)
+	// /Users/robfig/code/gocode/src/mars/samples/booking/app/controllers/hotels.go:191 (0x44735)
 	stack := string(debug.Stack())
 	frame, basePath := findRelevantStackFrame(stack)
 	if frame == -1 {

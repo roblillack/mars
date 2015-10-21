@@ -98,8 +98,8 @@ func TestHasLocaleCookieWithInvalidConfig(t *testing.T) {
 	if found, _ := hasLocaleCookie(buildRequestWithCookie("APP_LANG", "en-US")); found {
 		t.Errorf("Expected %s cookie to not exist because the configured name is missing", "APP_LANG")
 	}
-	if found, _ := hasLocaleCookie(buildRequestWithCookie("REVEL_LANG", "en-US")); !found {
-		t.Errorf("Expected %s cookie to exist", "REVEL_LANG")
+	if found, _ := hasLocaleCookie(buildRequestWithCookie("MARS_LANG", "en-US")); !found {
+		t.Errorf("Expected %s cookie to exist", "MARS_LANG")
 	}
 }
 
@@ -174,7 +174,7 @@ func loadTestI18nConfig(t *testing.T) {
 		t.Fatalf("Unable to load test config '%s': %s", testConfigName, error.Error())
 	}
 	Config = testConfig
-	CookiePrefix = Config.StringDefault("cookie.prefix", "REVEL")
+	CookiePrefix = Config.StringDefault("cookie.prefix", "MARS")
 }
 
 func loadTestI18nConfigWithoutLanguageCookieOption(t *testing.T) {

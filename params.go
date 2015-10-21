@@ -62,11 +62,11 @@ func ParseParams(params *Params, req *Request) {
 func (p *Params) Bind(dest interface{}, name string) {
 	value := reflect.ValueOf(dest)
 	if value.Kind() != reflect.Ptr {
-		panic("revel/params: non-pointer passed to Bind: " + name)
+		panic("mars/params: non-pointer passed to Bind: " + name)
 	}
 	value = value.Elem()
 	if !value.CanSet() {
-		panic("revel/params: non-settable variable passed to Bind: " + name)
+		panic("mars/params: non-settable variable passed to Bind: " + name)
 	}
 	value.Set(Bind(p, name, value.Type()))
 }

@@ -398,7 +398,7 @@ func bindFile(params *Params, name string, typ reflect.Type) reflect.Value {
 	}
 
 	// Otherwise, have to store it.
-	tmpFile, err := ioutil.TempFile("", "revel-upload")
+	tmpFile, err := ioutil.TempFile("", "mars-upload")
 	if err != nil {
 		WARN.Println("Failed to create a temp file to store upload:", err)
 		return reflect.Zero(typ)
@@ -490,7 +490,7 @@ func Unbind(output map[string]string, name string, val interface{}) {
 		if binder.Unbind != nil {
 			binder.Unbind(output, name, val)
 		} else {
-			ERROR.Printf("revel/binder: can not unbind %s=%s", name, val)
+			ERROR.Printf("mars/binder: can not unbind %s=%s", name, val)
 		}
 	}
 }
@@ -500,7 +500,7 @@ func binderForType(typ reflect.Type) (Binder, bool) {
 	if !ok {
 		binder, ok = KindBinders[typ.Kind()]
 		if !ok {
-			WARN.Println("revel/binder: no binder for type:", typ)
+			WARN.Println("mars/binder: no binder for type:", typ)
 			return Binder{}, false
 		}
 	}

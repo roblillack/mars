@@ -26,13 +26,13 @@ import (
 //
 // Func Interceptors may apply to any / all Controllers.
 //
-//   func example(*revel.Controller) revel.Result
+//   func example(*mars.Controller) mars.Result
 //
 // Method Interceptors are provided so that properties can be set on application
 // controllers.
 //
-//   func (c AppController) example() revel.Result
-//   func (c *AppController) example() revel.Result
+//   func (c AppController) example() mars.Result
+//   func (c *AppController) example() mars.Result
 //
 type InterceptorFunc func(*Controller) Result
 type InterceptorMethod interface{}
@@ -129,7 +129,7 @@ var interceptors []*Interception
 // Install a general interceptor.
 // This can be applied to any Controller.
 // It must have the signature of:
-//   func example(c *revel.Controller) revel.Result
+//   func example(c *mars.Controller) mars.Result
 func InterceptFunc(intc InterceptorFunc, when When, target interface{}) {
 	interceptors = append(interceptors, &Interception{
 		When:         when,
@@ -141,13 +141,13 @@ func InterceptFunc(intc InterceptorFunc, when When, target interface{}) {
 }
 
 // Install an interceptor method that applies to its own Controller.
-//   func (c AppController) example() revel.Result
-//   func (c *AppController) example() revel.Result
+//   func (c AppController) example() mars.Result
+//   func (c *AppController) example() mars.Result
 func InterceptMethod(intc InterceptorMethod, when When) {
 	methodType := reflect.TypeOf(intc)
 	if methodType.Kind() != reflect.Func || methodType.NumOut() != 1 || methodType.NumIn() != 1 {
 		log.Fatalln("Interceptor method should have signature like",
-			"'func (c *AppController) example() revel.Result' but was", methodType)
+			"'func (c *AppController) example() mars.Result' but was", methodType)
 	}
 	interceptors = append(interceptors, &Interception{
 		When:     when,
@@ -175,7 +175,7 @@ func getInterceptors(when When, val reflect.Value) []*Interception {
 // Also, convert between any difference in indirection.
 // If the target couldn't be found, the returned Value will have IsValid() == false
 func findTarget(val reflect.Value, target reflect.Type) reflect.Value {
-	// Look through the embedded types (until we reach the *revel.Controller at the top).
+	// Look through the embedded types (until we reach the *mars.Controller at the top).
 	valueQueue := []reflect.Value{val}
 	for len(valueQueue) > 0 {
 		val, valueQueue = valueQueue[0], valueQueue[1:]
@@ -191,7 +191,7 @@ func findTarget(val reflect.Value, target reflect.Type) reflect.Value {
 			return val.Addr()
 		}
 
-		// If we reached the *revel.Controller and still didn't find what we were
+		// If we reached the *mars.Controller and still didn't find what we were
 		// looking for, give up.
 		if val.Type() == controllerPtrType {
 			continue

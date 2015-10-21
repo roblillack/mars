@@ -37,7 +37,7 @@ func TestValidationWithError(t *testing.T) {
 		c.Validation.Keep()
 	})
 
-	if cookie, err := getRecordedCookie(recorder, "REVEL_ERRORS"); err != nil {
+	if cookie, err := getRecordedCookie(recorder, "MARS_ERRORS"); err != nil {
 		t.Fatal(err)
 	} else if cookie.MaxAge < 0 {
 		t.Fatalf("cookie should not expire")
@@ -53,14 +53,14 @@ func TestValidationNoKeep(t *testing.T) {
 		}
 	})
 
-	if _, err := getRecordedCookie(recorder, "REVEL_ERRORS"); err != http.ErrNoCookie {
+	if _, err := getRecordedCookie(recorder, "MARS_ERRORS"); err != http.ErrNoCookie {
 		t.Fatal(err)
 	}
 }
 
 // Test that a previously set _ERRORS cookie is deleted if no errors are found.
 func TestValidationNoKeepCookiePreviouslySet(t *testing.T) {
-	req := buildRequestWithCookie("REVEL_ERRORS", "invalid")
+	req := buildRequestWithCookie("MARS_ERRORS", "invalid")
 	recorder := validationTester(req, func(c *Controller) {
 		c.Validation.Required("success")
 		if c.Validation.HasErrors() {
@@ -68,7 +68,7 @@ func TestValidationNoKeepCookiePreviouslySet(t *testing.T) {
 		}
 	})
 
-	if cookie, err := getRecordedCookie(recorder, "REVEL_ERRORS"); err != nil {
+	if cookie, err := getRecordedCookie(recorder, "MARS_ERRORS"); err != nil {
 		t.Fatal(err)
 	} else if cookie.MaxAge >= 0 {
 		t.Fatalf("cookie should be deleted")

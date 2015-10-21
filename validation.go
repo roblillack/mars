@@ -27,7 +27,7 @@ type Validation struct {
 	keep   bool
 }
 
-// Keep tells revel to set a flash cookie on the client to make the validation
+// Keep tells Mars to set a flash cookie on the client to make the validation
 // errors available for the next request.
 // This is helpful  when redirecting the client after the validation failed.
 // It is good practice to always redirect upon a HTTP POST request. Thus
@@ -179,7 +179,7 @@ func (v *Validation) Check(obj interface{}, checks ...Validator) *ValidationResu
 	return result
 }
 
-// Revel Filter function to be hooked into the filter chain.
+// Mars Filter function to be hooked into the filter chain.
 func ValidationFilter(c *Controller, fc []Filter) {
 	errors, err := restoreValidationErrors(c.Request.Request)
 	c.Validation = &Validation{

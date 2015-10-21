@@ -53,7 +53,7 @@ func TestSetAction(t *testing.T) {
 	RegisterController((*PNN)(nil), []*MethodType{{Name: "Method"}})
 	RegisterController((*PP2)(nil), []*MethodType{{Name: "Method"}})
 
-	// Test that all *revel.Controllers are initialized.
+	// Test that all *mars.Controllers are initialized.
 	c := &Controller{Name: "Test"}
 	if err := c.SetAction("P", "Method"); err != nil {
 		t.Error(err)

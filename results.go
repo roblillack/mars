@@ -62,19 +62,19 @@ func (r ErrorResult) Apply(req *Request, resp *Response) {
 		return
 	}
 
-	// If it's not a revel error, wrap it in one.
-	var revelError *Error
+	// If it's not a mars error, wrap it in one.
+	var marsError *Error
 	switch e := r.Error.(type) {
 	case *Error:
-		revelError = e
+		marsError = e
 	case error:
-		revelError = &Error{
+		marsError = &Error{
 			Title:       "Server Error",
 			Description: e.Error(),
 		}
 	}
 
-	if revelError == nil {
+	if marsError == nil {
 		panic("no error provided")
 	}
 
@@ -82,7 +82,7 @@ func (r ErrorResult) Apply(req *Request, resp *Response) {
 		r.RenderArgs = make(map[string]interface{})
 	}
 	r.RenderArgs["RunMode"] = RunMode
-	r.RenderArgs["Error"] = revelError
+	r.RenderArgs["Error"] = marsError
 	r.RenderArgs["Router"] = MainRouter
 
 	// Render it.
@@ -101,7 +101,7 @@ func (r ErrorResult) Apply(req *Request, resp *Response) {
 		resp.WriteHeader(status, contentType)
 		b.WriteTo(resp.Out)
 	} else {
-		websocket.Message.Send(req.Websocket, fmt.Sprint(revelError))
+		websocket.Message.Send(req.Websocket, fmt.Sprint(marsError))
 	}
 
 }

@@ -269,8 +269,8 @@ func validateRoute(route *Route) error {
 
 // routeError adds context to a simple error message.
 func routeError(err error, routesPath, content string, n int) *Error {
-	if revelError, ok := err.(*Error); ok {
-		return revelError
+	if marsError, ok := err.(*Error); ok {
+		return marsError
 	}
 	// Load the route file content if necessary
 	if content == "" {
@@ -344,7 +344,7 @@ func (a *ActionDefinition) String() string {
 func (router *Router) Reverse(action string, argValues map[string]string) *ActionDefinition {
 	actionSplit := strings.Split(action, ".")
 	if len(actionSplit) != 2 {
-		ERROR.Print("revel/router: reverse router got invalid action ", action)
+		ERROR.Print("mars/router: reverse router got invalid action ", action)
 		return nil
 	}
 	controllerName, methodName := actionSplit[0], actionSplit[1]
@@ -382,7 +382,7 @@ func (router *Router) Reverse(action string, argValues map[string]string) *Actio
 			val, ok := argValues[el[1:]]
 			if !ok {
 				val = "<nil>"
-				ERROR.Print("revel/router: reverse route missing route arg ", el[1:])
+				ERROR.Print("mars/router: reverse route missing route arg ", el[1:])
 			}
 			pathElements[i] = val
 			delete(argValues, el[1:])

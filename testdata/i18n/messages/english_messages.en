@@ -1,6 +1,6 @@
 greeting=Hello 
 greeting.name=Rob
-greeting.suffix=, welcome to Revel!
+greeting.suffix=, welcome to Mars!
 
 folded=Greeting is '%(greeting)s'
 folded.arguments=%(greeting.name)s is %d years old

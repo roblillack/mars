@@ -136,8 +136,8 @@ func GetSessionFromCookie(cookie *http.Cookie) Session {
 	return session
 }
 
-// SessionFilter is a Revel Filter that retrieves and sets the session cookie.
-// Within Revel, it is available as a Session attribute on Controller instances.
+// SessionFilter is a Mars Filter that retrieves and sets the session cookie.
+// Within Mars, it is available as a Session attribute on Controller instances.
 // The name of the Session cookie is set as CookiePrefix + "_SESSION".
 func SessionFilter(c *Controller, fc []Filter) {
 	c.Session = restoreSession(c.Request.Request)

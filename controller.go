@@ -76,7 +76,7 @@ func (c *Controller) setStatusIfNil(status int) {
 //
 // For example:
 //
-//     func (c Users) ShowUser(id int) revel.Result {
+//     func (c Users) ShowUser(id int) mars.Result {
 //     	 user := loadUser(id)
 //     	 return c.Render(user)
 //     }
@@ -268,10 +268,10 @@ func (c *Controller) SetAction(controllerName, methodName string) error {
 	// Look up the controller and method types.
 	var ok bool
 	if c.Type, ok = controllers[strings.ToLower(controllerName)]; !ok {
-		return errors.New("revel/controller: failed to find controller " + controllerName)
+		return errors.New("mars/controller: failed to find controller " + controllerName)
 	}
 	if c.MethodType = c.Type.Method(methodName); c.MethodType == nil {
-		return errors.New("revel/controller: failed to find action " + methodName)
+		return errors.New("mars/controller: failed to find action " + methodName)
 	}
 
 	c.Name, c.MethodName = c.Type.Type.Name(), c.MethodType.Name
@@ -284,7 +284,7 @@ func (c *Controller) SetAction(controllerName, methodName string) error {
 }
 
 // This is a helper that initializes (zeros) a new app controller value.
-// Specifically, it sets all *revel.Controller embedded types to the provided controller.
+// Specifically, it sets all *mars.Controller embedded types to the provided controller.
 // Returns a value representing a pointer to the new app controller.
 func initNewAppController(appControllerType *ControllerType, c *Controller) reflect.Value {
 	var (
@@ -377,7 +377,7 @@ func (ct *ControllerType) Method(name string) *MethodType {
 
 var controllers = make(map[string]*ControllerType)
 
-// Register a Controller and its Methods with Revel.
+// Register a Controller and its Methods with Mars.
 func RegisterController(c interface{}, methods []*MethodType) {
 	// De-star the controller type
 	// (e.g. given TypeOf((*Application)(nil)), want TypeOf(Application))

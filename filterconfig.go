@@ -34,7 +34,7 @@ var filterOverrides = make(map[string][]Filter)
 //
 // Insert:
 //   FilterAction(App.Action).
-//     Insert(OtherFilter, revel.BEFORE, SessionFilter)
+//     Insert(OtherFilter, mars.BEFORE, SessionFilter)
 //
 //   => RouterFilter, FilterConfiguringFilter, OtherFilter, SessionFilter, ActionInvoker
 //
@@ -129,9 +129,9 @@ func (conf FilterConfigurator) rmFilter(target Filter, fc []Filter) []Filter {
 
 // Insert a filter into the filter chain before or after another.
 // This may be called with the BEFORE or AFTER constants, for example:
-//   revel.FilterAction(App.Index).
-//     Insert(MyFilter, revel.BEFORE, revel.ActionInvoker).
-//     Insert(MyFilter2, revel.AFTER, revel.PanicFilter)
+//   mars.FilterAction(App.Index).
+//     Insert(MyFilter, mars.BEFORE, mars.ActionInvoker).
+//     Insert(MyFilter2, mars.AFTER, mars.PanicFilter)
 func (conf FilterConfigurator) Insert(insert Filter, where When, target Filter) FilterConfigurator {
 	if where != BEFORE && where != AFTER {
 		panic("where must be BEFORE or AFTER")
@@ -170,7 +170,7 @@ func (conf FilterConfigurator) getChain() []Filter {
 			}
 		}
 		if filters == nil {
-			panic("FilterConfiguringFilter not found in revel.Filters.")
+			panic("FilterConfiguringFilter not found in mars.Filters.")
 		}
 	}
 	return filters

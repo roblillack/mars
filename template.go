@@ -450,7 +450,7 @@ type GoTemplate struct {
 	loader *TemplateLoader
 }
 
-// return a 'revel.Template' from Go's template.
+// return a 'mars.Template' from Go's template.
 func (gotmpl GoTemplate) Render(wr io.Writer, arg interface{}) error {
 	return gotmpl.Execute(wr, arg)
 }

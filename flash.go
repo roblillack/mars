@@ -36,8 +36,8 @@ func (f Flash) Success(msg string, args ...interface{}) {
 	}
 }
 
-// FlashFilter is a Revel Filter that retrieves and sets the flash cookie.
-// Within Revel, it is available as a Flash attribute on Controller instances.
+// FlashFilter is a Mars Filter that retrieves and sets the flash cookie.
+// Within Mars, it is available as a Flash attribute on Controller instances.
 // The name of the Flash cookie is set as CookiePrefix + "_FLASH".
 func FlashFilter(c *Controller, fc []Filter) {
 	c.Flash = restoreFlash(c.Request.Request)

@@ -15,15 +15,15 @@ import (
 )
 
 const (
-	REVEL_IMPORT_PATH = "github.com/roblillack/mars"
+	MARS_IMPORT_PATH = "github.com/roblillack/mars"
 )
 
-type revelLogs struct {
+type marsLogs struct {
 	c gocolorize.Colorize
 	w io.Writer
 }
 
-func (r *revelLogs) Write(p []byte) (n int, err error) {
+func (r *marsLogs) Write(p []byte) (n int, err error) {
 	return r.w.Write([]byte(r.c.Paint(string(p))))
 }
 
@@ -80,7 +80,7 @@ var (
 		"error": gocolorize.NewColor("red"),
 	}
 
-	error_log = revelLogs{c: colors["error"], w: os.Stderr}
+	error_log = marsLogs{c: colors["error"], w: os.Stderr}
 
 	// Loggers
 	TRACE = log.New(ioutil.Discard, "TRACE ", log.Ldate|log.Ltime|log.Lshortfile)
@@ -158,7 +158,7 @@ func InitDefaults(mode, basePath string) {
 
 	AppName = Config.StringDefault("app.name", "(not set)")
 	AppRoot = Config.StringDefault("app.root", "")
-	CookiePrefix = Config.StringDefault("cookie.prefix", "REVEL")
+	CookiePrefix = Config.StringDefault("cookie.prefix", "MARS")
 	CookieDomain = Config.StringDefault("cookie.domain", "")
 	CookieHttpOnly = Config.BoolDefault("cookie.httponly", false)
 	CookieSecure = Config.BoolDefault("cookie.secure", false)
@@ -180,7 +180,7 @@ func InitDefaults(mode, basePath string) {
 	loadModules()
 
 	Initialized = true
-	INFO.Printf("Initialized Revel v%s (%s) for %s", VERSION, BUILD_DATE, MINIMUM_GO)
+	INFO.Printf("Initialized Mars v%s (%s) for %s", VERSION, BUILD_DATE, MINIMUM_GO)
 }
 
 // Create a logger using log.* directives in app.conf plus the current settings
@@ -190,14 +190,14 @@ func getLogger(name string) *log.Logger {
 
 	// Create a logger with the requested output. (default to stderr)
 	output := Config.StringDefault("log."+name+".output", "stderr")
-	var newlog revelLogs
+	var newlog marsLogs
 
 	switch output {
 	case "stdout":
-		newlog = revelLogs{c: colors[name], w: os.Stdout}
+		newlog = marsLogs{c: colors[name], w: os.Stdout}
 		logger = newLogger(&newlog)
 	case "stderr":
-		newlog = revelLogs{c: colors[name], w: os.Stderr}
+		newlog = marsLogs{c: colors[name], w: os.Stderr}
 		logger = newLogger(&newlog)
 	default:
 		if output == "off" {
@@ -257,7 +257,7 @@ func ResolveImportPath(importPath string) (string, error) {
 	for _, p := range []string{
 		importPath,
 		path.Join(ImportPath, "vendor", importPath),
-		path.Join(REVEL_IMPORT_PATH, "vendor", importPath)} {
+		path.Join(MARS_IMPORT_PATH, "vendor", importPath)} {
 		modPkg, err = build.Import(p, "", build.FindOnly)
 		if err == nil {
 			break
@@ -301,6 +301,6 @@ func ModuleByName(name string) (m Module, found bool) {
 
 func CheckInit() {
 	if !Initialized {
-		panic("Revel has not been initialized!")
+		panic("Mars has not been initialized!")
 	}
 }
