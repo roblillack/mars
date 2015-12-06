@@ -187,6 +187,27 @@ func NewTemplateLoader(paths []string) *TemplateLoader {
 	return loader
 }
 
+func (loader *TemplateLoader) createEmptyTemplateSet() *Error {
+	// Create the template set.  This panics if any of the funcs do not
+	// conform to expectations, so we wrap it in a func and handle those
+	// panics by serving an error page.
+	var funcError *Error
+	func() {
+		defer func() {
+			if err := recover(); err != nil {
+				funcError = &Error{
+					Title:       "Panic (Template Loader)",
+					Description: fmt.Sprintln(err),
+				}
+			}
+		}()
+		loader.templateSet = template.New("_").Funcs(TemplateFuncs)
+		loader.templateSet.Parse("")
+	}()
+
+	return funcError
+}
+
 // This scans the views directory and parses all templates as Go Templates.
 // If a template fails to parse, the error is set on the loader.
 // (It's awkward to refresh a single Go Template)
@@ -197,8 +218,21 @@ func (loader *TemplateLoader) Refresh() *Error {
 	loader.templatePaths = map[string]string{}
 	loader.templateNames = map[string]string{}
 
+	if err := loader.createEmptyTemplateSet(); err != nil {
+		return err
+	}
+
+	for _, i := range AssetNames() {
+		lowerTemplateName := strings.ToLower(i)
+		if raw, err := Asset(i); err == nil {
+			if _, err := loader.templateSet.New(i).Parse(string(raw)); err == nil {
+				loader.templatePaths[i] = ""
+				loader.templateNames[lowerTemplateName] = i
+			}
+		}
+	}
+
 	// Walk through the template loader's paths and build up a template set.
-	var templateSet *template.Template = nil
 	for _, basePath := range loader.paths {
 		// Walk only returns an error if the template loader is completely unusable
 		// (namely, if one of the TemplateFuncs does not have an acceptable signature).
@@ -292,31 +326,7 @@ func (loader *TemplateLoader) Refresh() *Error {
 					fileStr = string(fileBytes)
 				}
 
-				if templateSet == nil {
-					// Create the template set.  This panics if any of the funcs do not
-					// conform to expectations, so we wrap it in a func and handle those
-					// panics by serving an error page.
-					var funcError *Error
-					func() {
-						defer func() {
-							if err := recover(); err != nil {
-								funcError = &Error{
-									Title:       "Panic (Template Loader)",
-									Description: fmt.Sprintln(err),
-								}
-							}
-						}()
-						templateSet = template.New(templateName).Funcs(TemplateFuncs)
-						_, err = templateSet.Parse(fileStr)
-					}()
-
-					if funcError != nil {
-						return funcError
-					}
-
-				} else {
-					_, err = templateSet.New(templateName).Parse(fileStr)
-				}
+				_, err = loader.templateSet.New(templateName).Parse(fileStr)
 				return err
 			}
 
@@ -349,8 +359,6 @@ func (loader *TemplateLoader) Refresh() *Error {
 		}
 	}
 
-	// Note: compileError may or may not be set.
-	loader.templateSet = templateSet
 	return loader.compileError
 }
 
@@ -393,28 +401,27 @@ func (loader *TemplateLoader) Template(name string) (Template, error) {
 	// Case-insensitive matching of template file name
 	templateName := loader.templateNames[strings.ToLower(name)]
 
+	var err error
+	var tmpl *template.Template
+
+	if loader.templateSet == nil {
+		if err := loader.Refresh(); err != nil {
+			return nil, fmt.Errorf("No template loader, unable to refresh: %s", err)
+		}
+	}
+
 	// Look up and return the template.
-	tmpl := loader.templateSet.Lookup(templateName)
+	tmpl = loader.templateSet.Lookup(templateName)
 
 	// This is necessary.
 	// If a nil loader.compileError is returned directly, a caller testing against
 	// nil will get the wrong result.  Something to do with casting *Error to error.
-	var err error
 	if loader.compileError != nil {
 		err = loader.compileError
 	}
 
 	if tmpl == nil && err == nil {
 		WARN.Printf("Template %s not found.", name)
-		// No application-supplied template found? Use the embedded ones …
-		if data, dataErr := Asset(templateName); dataErr == nil {
-			WARN.Printf("Asset %s found.", templateName)
-
-			tmpl = template.New(templateName)
-			_, err := tmpl.Parse(string(data))
-			return GoTemplate{tmpl, loader}, err
-		}
-
 		return nil, fmt.Errorf("Template %s not found.", name)
 	}
 
