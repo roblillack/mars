@@ -20,7 +20,7 @@ type Hotels struct {
 	*Controller
 }
 
-type Static struct {
+type MyStatic struct {
 	*Controller
 }
 
@@ -39,7 +39,7 @@ func (c Hotels) Index() Result {
 	return c.RenderText("Hello, World!")
 }
 
-func (c Static) Serve(prefix, filepath string) Result {
+func (c MyStatic) Serve(prefix, filepath string) Result {
 	var basePath, dirName string
 
 	if !path.IsAbs(dirName) {
@@ -61,7 +61,8 @@ func startFakeBookingApp() {
 	InitDefaults("prod", "testdata")
 
 	// Disable logging.
-	TRACE = log.New(ioutil.Discard, "", 0)
+	_ = ioutil.Discard
+	TRACE = log.New(os.Stderr, "", 0)
 	INFO = TRACE
 	WARN = TRACE
 	ERROR = TRACE
