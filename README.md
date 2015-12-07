@@ -9,3 +9,7 @@ Mars is a fork of the fantastic [Revel framework](https://github.com/revel/revel
 ## Quick Start
 
 Hah. Sorry, nothing here, yet.
+
+## Links
+- [Code Coverage](http://gocover.io/github.com/roblillack/mars)
+- [Go Report Card](http://goreportcard.com/report/roblillack/mars)
