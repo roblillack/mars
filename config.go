@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// This handles the parsing of app.conf
+// MergedConfig handles the parsing of app.conf
 // It has a "preferred" section that is checked first for option queries.
 // If the preferred section does not have the option, the DEFAULT section is
 // checked fallback.

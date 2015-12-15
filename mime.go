@@ -552,7 +552,7 @@ var defaultMimeTypes = map[string]string{
 	"oex": "application/x-opera-extension",
 }
 
-const DefaultFileContentType = "application/octet-stream"
+const defaultFileContentType = "application/octet-stream"
 
 // Returns a MIME content type based on the filename's extension.
 // If no appropriate one is found, returns "application/octet-stream" by default.
@@ -560,7 +560,7 @@ const DefaultFileContentType = "application/octet-stream"
 func ContentTypeByFilename(filename string) string {
 	dot := strings.LastIndex(filename, ".")
 	if dot == -1 || dot+1 >= len(filename) {
-		return DefaultFileContentType
+		return defaultFileContentType
 	}
 
 	extension := filename[dot+1:]
@@ -572,7 +572,7 @@ func ContentTypeByFilename(filename string) string {
 		contentType = defaultMimeTypes[extension]
 	}
 	if contentType == "" {
-		return DefaultFileContentType
+		return defaultFileContentType
 	}
 
 	if strings.HasPrefix(contentType, "text/") {

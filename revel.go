@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	MARS_IMPORT_PATH = "github.com/roblillack/mars"
+	MarsImportPath = "github.com/roblillack/mars"
 )
 
 type marsLogs struct {
@@ -230,7 +230,7 @@ func ResolveImportPath(importPath string) (string, error) {
 	for _, p := range []string{
 		importPath,
 		path.Join(ImportPath, "vendor", importPath),
-		path.Join(MARS_IMPORT_PATH, "vendor", importPath)} {
+		path.Join(MarsImportPath, "vendor", importPath)} {
 		modPkg, err = build.Import(p, "", build.FindOnly)
 		if err == nil {
 			break

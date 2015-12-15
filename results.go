@@ -37,7 +37,7 @@ func (r ErrorResult) Apply(req *Request, resp *Response) {
 	}
 
 	contentType := ContentTypeByFilename("xxx." + format)
-	if contentType == DefaultFileContentType {
+	if contentType == defaultFileContentType {
 		contentType = "text/plain"
 	}
 

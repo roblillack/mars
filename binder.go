@@ -51,8 +51,8 @@ func ValueBinder(f func(value string, typ reflect.Type) reflect.Value) func(*Par
 }
 
 const (
-	DEFAULT_DATE_FORMAT     = "2006-01-02"
-	DEFAULT_DATETIME_FORMAT = "2006-01-02 15:04"
+	defaultDateFormat     = "2006-01-02"
+	defaultDateTimeFormat = "2006-01-02 15:04"
 )
 
 var (
@@ -224,8 +224,8 @@ func init() {
 	TypeBinders[reflect.TypeOf((*io.ReadSeeker)(nil)).Elem()] = Binder{bindReadSeeker, nil}
 
 	OnAppStart(func() {
-		DateTimeFormat = Config.StringDefault("format.datetime", DEFAULT_DATETIME_FORMAT)
-		DateFormat = Config.StringDefault("format.date", DEFAULT_DATE_FORMAT)
+		DateTimeFormat = Config.StringDefault("format.datetime", defaultDateTimeFormat)
+		DateFormat = Config.StringDefault("format.date", defaultDateFormat)
 		TimeFormats = append(TimeFormats, DateTimeFormat, DateFormat)
 	})
 }

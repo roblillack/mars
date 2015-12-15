@@ -337,7 +337,7 @@ func appendAction(fset *token.FileSet, mm methodMap, decl ast.Decl, pkgImportPat
 	if selExpr.Sel.Name != "Result" {
 		return
 	}
-	if pkgIdent, ok := selExpr.X.(*ast.Ident); !ok || imports[pkgIdent.Name] != mars.MARS_IMPORT_PATH {
+	if pkgIdent, ok := selExpr.X.(*ast.Ident); !ok || imports[pkgIdent.Name] != mars.MarsImportPath {
 		return
 	}
 
@@ -446,7 +446,7 @@ func (s *SourceInfo) TypesThatEmbed(targetType string) (filtered []*TypeInfo) {
 
 func (s *SourceInfo) ControllerSpecs() []*TypeInfo {
 	if s.controllerSpecs == nil {
-		s.controllerSpecs = s.TypesThatEmbed(mars.MARS_IMPORT_PATH + ".Controller")
+		s.controllerSpecs = s.TypesThatEmbed(mars.MarsImportPath + ".Controller")
 	}
 	return s.controllerSpecs
 }
