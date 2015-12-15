@@ -22,3 +22,6 @@ import:
   - package: github.com/robfig/cron
     ref: 67823cd24dece1b04cced3a0a0b3ca2bc84d875e
     vcs: git
+  - package: github.com/codegangsta/cli
+    vcs: git
+    ref: a65b733b303f0055f8d324d805f393cd3e7a7904

@@ -26,6 +26,6 @@ url = https://github.com/robfig/pathtree.git
 path = vendor/github.com/robfig/cron
 url = https://github.com/robfig/cron.git
 
-[submodule "modules"]
-path = vendor/github.com/revel/modules
-url = https://github.com/revel/modules.git
+[submodule "cli"]
+path = vendor/github.com/codegangsta/cli
+  url = https://github.com/codegangsta/cli.git
