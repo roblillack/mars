@@ -34,28 +34,38 @@ import (
 //   func (c AppController) example() mars.Result
 //   func (c *AppController) example() mars.Result
 //
+
+// InterceptorFunc represents a function that can be used to intercept action
+// invocation of a specific or all controllers.
 type InterceptorFunc func(*Controller) Result
+
+// InterceptorMethos represents a method that can be used to intercept action
+// invocations of a specific application controller.
 type InterceptorMethod interface{}
 
 // When allows specifying when an interceptor shall be called.
 type When int
 
 const (
-	BEFORE  When = iota // Interceptor shall be called before invoking the action.
-	AFTER               // Interceptor shall be called after invoking the action.
-	PANIC               // Interceptor shall be called in case the action paniced.
-	FINALLY             // Interceptor shall be called after invoking the action, and after recovering from a panic.
+	// Interceptor shall be called before invoking the action.
+	BEFORE When = iota
+	// Interceptor shall be called after invoking the action.
+	AFTER
+	// Interceptor shall be called in case the action paniced.
+	PANIC
+	// Interceptor shall be called after invoking the action, and after recovering from a panic.
+	FINALLY
 )
 
 // InterceptTarget is a helper make AllControllers have a valid type.
 type InterceptTarget int
 
 const (
-	// And interception target of AllControllers means that the function will intercept all controllers.
+	// AllControllers means that the function will intercept all controllers.
 	AllControllers InterceptTarget = iota
 )
 
-// Interception allows specifying a configuration of when to intercept what action invocations.
+// Interception allows specifying a configuration of when to intercept which invocations.
 type Interception struct {
 	When When
 
@@ -89,6 +99,7 @@ func (i Interception) Invoke(val reflect.Value) reflect.Value {
 	return vals[0]
 }
 
+// InterceptorFilter adds the interception functionality to Mars' filter chain.
 func InterceptorFilter(c *Controller, fc []Filter) {
 	defer invokeInterceptors(FINALLY, c)
 	defer func() {
@@ -130,7 +141,7 @@ func invokeInterceptors(when When, c *Controller) {
 
 var interceptors []*Interception
 
-// InterceptFunc install a general interceptor.
+// InterceptFunc installs a general interceptor.
 // This can be applied to any Controller.
 // It must have the signature of:
 //   func example(c *mars.Controller) mars.Result
