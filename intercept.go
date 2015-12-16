@@ -36,21 +36,26 @@ import (
 //
 type InterceptorFunc func(*Controller) Result
 type InterceptorMethod interface{}
+
+// When allows specifying when an interceptor shall be called.
 type When int
 
 const (
-	BEFORE When = iota
-	AFTER
-	PANIC
-	FINALLY
+	BEFORE  When = iota // Interceptor shall be called before invoking the action.
+	AFTER               // Interceptor shall be called after invoking the action.
+	PANIC               // Interceptor shall be called in case the action paniced.
+	FINALLY             // Interceptor shall be called after invoking the action, and after recovering from a panic.
 )
 
+// InterceptTarget is a helper make AllControllers have a valid type.
 type InterceptTarget int
 
 const (
+	// And interception target of AllControllers means that the function will intercept all controllers.
 	AllControllers InterceptTarget = iota
 )
 
+// Interception allows specifying a configuration of when to intercept what action invocations.
 type Interception struct {
 	When When
 
@@ -62,8 +67,7 @@ type Interception struct {
 	interceptAll bool
 }
 
-// Perform the given interception.
-// val is a pointer to the App Controller.
+// Invoke performs the given interception. val is a pointer to the App Controller.
 func (i Interception) Invoke(val reflect.Value) reflect.Value {
 	var arg reflect.Value
 	if i.function == nil {
@@ -126,7 +130,7 @@ func invokeInterceptors(when When, c *Controller) {
 
 var interceptors []*Interception
 
-// Install a general interceptor.
+// InterceptFunc install a general interceptor.
 // This can be applied to any Controller.
 // It must have the signature of:
 //   func example(c *mars.Controller) mars.Result
@@ -140,7 +144,7 @@ func InterceptFunc(intc InterceptorFunc, when When, target interface{}) {
 	})
 }
 
-// Install an interceptor method that applies to its own Controller.
+// InterceptMethod installs an interceptor method that applies to its own Controller.
 //   func (c AppController) example() mars.Result
 //   func (c *AppController) example() mars.Result
 func InterceptMethod(intc InterceptorMethod, when When) {
