@@ -161,11 +161,11 @@ var {{.StructName}} t{{.StructName}}
 
 {{range .MethodSpecs}}
 func (_ t{{$c.StructName}}) {{.Name}}({{range .Args}}
-                {{.Name}} {{if .ImportPath}}{{index $.ImportPaths .ImportPath | .TypeExpr.TypeName}}{{else}}{{.TypeExpr.TypeName ""}}{{end}},{{end}}
+                {{.Name}}_ {{if .ImportPath}}{{index $.ImportPaths .ImportPath | .TypeExpr.TypeName}}{{else}}{{.TypeExpr.TypeName ""}}{{end}},{{end}}
                 ) string {
         args := make(map[string]string)
         {{range .Args}}
-        mars.Unbind(args, "{{.Name}}", {{.Name}}){{end}}
+        mars.Unbind(args, "{{.Name}}", {{.Name}}_){{end}}
         return mars.MainRouter.Reverse("{{$c.StructName}}.{{.Name}}", args).Url
 }
 {{end}}
