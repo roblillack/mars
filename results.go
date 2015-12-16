@@ -233,21 +233,21 @@ func (r *RenderTemplateResult) render(req *Request, resp *Response, wr io.Writer
 	ErrorResult{r.RenderArgs, compileError}.Apply(req, resp)
 }
 
-type RenderHtmlResult struct {
+type RenderHTMLResult struct {
 	html string
 }
 
-func (r RenderHtmlResult) Apply(req *Request, resp *Response) {
+func (r RenderHTMLResult) Apply(req *Request, resp *Response) {
 	resp.WriteHeader(http.StatusOK, "text/html; charset=utf-8")
 	resp.Out.Write([]byte(r.html))
 }
 
-type RenderJsonResult struct {
+type RenderJSONResult struct {
 	obj      interface{}
 	callback string
 }
 
-func (r RenderJsonResult) Apply(req *Request, resp *Response) {
+func (r RenderJSONResult) Apply(req *Request, resp *Response) {
 	var b []byte
 	var err error
 	if Config.BoolDefault("results.pretty", false) {
@@ -273,11 +273,11 @@ func (r RenderJsonResult) Apply(req *Request, resp *Response) {
 	resp.Out.Write([]byte(");"))
 }
 
-type RenderXmlResult struct {
+type RenderXMLResult struct {
 	obj interface{}
 }
 
-func (r RenderXmlResult) Apply(req *Request, resp *Response) {
+func (r RenderXMLResult) Apply(req *Request, resp *Response) {
 	var b []byte
 	var err error
 	if Config.BoolDefault("results.pretty", false) {

@@ -32,7 +32,7 @@ func (c Hotels) Show(id int) Result {
 
 func (c Hotels) Book(id int) Result {
 	hotel := &Hotel{id, "A Hotel", "300 Main St.", "New York", "NY", "10010", "USA", 300}
-	return c.RenderJson(hotel)
+	return c.RenderJSON(hotel)
 }
 
 func (c Hotels) Index() Result {

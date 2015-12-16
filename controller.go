@@ -112,28 +112,28 @@ func (c *Controller) RenderTemplate(templatePath string) Result {
 	}
 }
 
-// RenderJson uses encoding/json.Marshal to return JSON to the client.
-func (c *Controller) RenderJson(o interface{}) Result {
+// RenderJSON uses encoding/json.Marshal to return JSON to the client.
+func (c *Controller) RenderJSON(o interface{}) Result {
 	c.setStatusIfNil(http.StatusOK)
 
-	return RenderJsonResult{o, ""}
+	return RenderJSONResult{o, ""}
 }
 
-// RenderJsonP renders a JSONP result using encoding/json.Marshal
-func (c *Controller) RenderJsonP(callback string, o interface{}) Result {
+// RenderJSONP renders a JSONP result using encoding/json.Marshal
+func (c *Controller) RenderJSONP(callback string, o interface{}) Result {
 	c.setStatusIfNil(http.StatusOK)
 
-	return RenderJsonResult{o, callback}
+	return RenderJSONResult{o, callback}
 }
 
-// RenderXml uses encoding/xml.Marshal to return XML to the client.
-func (c *Controller) RenderXml(o interface{}) Result {
+// RenderXML uses encoding/xml.Marshal to return XML to the client.
+func (c *Controller) RenderXML(o interface{}) Result {
 	c.setStatusIfNil(http.StatusOK)
 
-	return RenderXmlResult{o}
+	return RenderXMLResult{o}
 }
 
-// RenderPlaintext renders plaintext in response, printf style.
+// RenderText renders plaintext in response, printf style.
 func (c *Controller) RenderText(text string, objs ...interface{}) Result {
 	c.setStatusIfNil(http.StatusOK)
 
@@ -144,11 +144,11 @@ func (c *Controller) RenderText(text string, objs ...interface{}) Result {
 	return &RenderTextResult{finalText}
 }
 
-// RenderHtml render html in response
-func (c *Controller) RenderHtml(html string) Result {
+// RenderHTML renders HTML in response
+func (c *Controller) RenderHTML(html string) Result {
 	c.setStatusIfNil(http.StatusOK)
 
-	return &RenderHtmlResult{html}
+	return &RenderHTMLResult{html}
 }
 
 // Todo returns an HTTP 501 Not Implemented "todo" indicating that the
