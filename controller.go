@@ -12,8 +12,11 @@ import (
 	"time"
 )
 
+// Args is a simple shorthand form for map[string]interface{} to represent
+// rendering arguments.
 type Args map[string]interface{}
 
+// Controller is the main type to embed for creating your own controllers.
 type Controller struct {
 	Name          string          // The controller name, e.g. "Application"
 	Type          *ControllerType // A description of the controller type.
@@ -34,6 +37,8 @@ type Controller struct {
 	Validation *Validation // Data validation helpers
 }
 
+// NewController creates a new controller based on the given Request and
+// Response structure.
 func NewController(req *Request, resp *Response) *Controller {
 	return &Controller{
 		Request:  req,
@@ -71,7 +76,7 @@ func (c *Controller) setStatusIfNil(status int) {
 	}
 }
 
-// Render a template corresponding to the calling Controller method.
+// Render renders a template corresponding to the calling Controller method.
 //
 // For example:
 //
@@ -90,8 +95,8 @@ func (c *Controller) Render(extraRenderArgs ...Args) Result {
 	return c.RenderTemplate(c.Name + "/" + c.MethodType.Name + "." + c.Request.Format)
 }
 
-// A less magical way to render a template.
-// Renders the given template, using the current RenderArgs.
+// RenderTemplate is a less magical way to render a template. Renders the
+// given template, using the current RenderArgs.
 func (c *Controller) RenderTemplate(templatePath string) Result {
 	// Get the Template.
 	template, err := MainTemplateLoader.Template(templatePath)
@@ -107,28 +112,28 @@ func (c *Controller) RenderTemplate(templatePath string) Result {
 	}
 }
 
-// Uses encoding/json.Marshal to return JSON to the client.
+// RenderJson uses encoding/json.Marshal to return JSON to the client.
 func (c *Controller) RenderJson(o interface{}) Result {
 	c.setStatusIfNil(http.StatusOK)
 
 	return RenderJsonResult{o, ""}
 }
 
-// Renders a JSONP result using encoding/json.Marshal
+// RenderJsonP renders a JSONP result using encoding/json.Marshal
 func (c *Controller) RenderJsonP(callback string, o interface{}) Result {
 	c.setStatusIfNil(http.StatusOK)
 
 	return RenderJsonResult{o, callback}
 }
 
-// Uses encoding/xml.Marshal to return XML to the client.
+// RenderXml uses encoding/xml.Marshal to return XML to the client.
 func (c *Controller) RenderXml(o interface{}) Result {
 	c.setStatusIfNil(http.StatusOK)
 
 	return RenderXmlResult{o}
 }
 
-// Render plaintext in response, printf style.
+// RenderPlaintext renders plaintext in response, printf style.
 func (c *Controller) RenderText(text string, objs ...interface{}) Result {
 	c.setStatusIfNil(http.StatusOK)
 
@@ -139,7 +144,7 @@ func (c *Controller) RenderText(text string, objs ...interface{}) Result {
 	return &RenderTextResult{finalText}
 }
 
-// Render html in response
+// RenderHtml render html in response
 func (c *Controller) RenderHtml(html string) Result {
 	c.setStatusIfNil(http.StatusOK)
 
@@ -219,7 +224,7 @@ func (c *Controller) RenderBinary(memfile io.Reader, filename string, delivery C
 	}
 }
 
-// Redirect to an action or to a URL.
+// Redirect returns a result that redirects to an action or to a URL.
 //   c.Redirect(Controller.Action)
 //   c.Redirect("/controller/action")
 //   c.Redirect("/controller/%d/action", id)
@@ -235,8 +240,8 @@ func (c *Controller) Redirect(val interface{}, args ...interface{}) Result {
 	return &RedirectToActionResult{val}
 }
 
-// Perform a message lookup for the given message name using the given arguments
-// using the current language defined for this controller.
+// Message performs a message lookup for the given message name using the
+// given arguments using the current language defined for this controller.
 //
 // The current language is set by the i18n plugin.
 func (c *Controller) Message(message string, args ...interface{}) (value string) {
@@ -358,7 +363,7 @@ func (ct *ControllerType) Method(name string) *MethodType {
 
 var controllers = make(map[string]*ControllerType)
 
-// Register a Controller and its Methods with Mars.
+// RegisterController registers a controller and its methods with Mars.
 func RegisterController(c interface{}, methods []*MethodType) {
 	// De-star the controller type
 	// (e.g. given TypeOf((*Application)(nil)), want TypeOf(Application))

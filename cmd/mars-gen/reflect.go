@@ -4,7 +4,6 @@ package main
 // It catalogs the controllers, their methods, and their arguments.
 
 import (
-	"errors"
 	"fmt"
 	"go/ast"
 	"go/build"
@@ -55,6 +54,7 @@ func (info TypeInfo) String() string {
 	return str
 }
 
+// MethodSpec represents a method defined for a receiver type represented by TypeInfo.
 type MethodSpec struct {
 	Name string       // Name of the method, e.g. "Index"
 	Args []*MethodArg // Argument descriptors
@@ -71,6 +71,7 @@ func (m MethodSpec) String() string {
 	return str + ")"
 }
 
+// MethodArg represents a single argument to a method represented by MethodSpec.
 type MethodArg struct {
 	Name       string   // Name of the argument.
 	TypeExpr   TypeExpr // The name of the type, e.g. "int", "*pkg.UserType"
@@ -85,8 +86,8 @@ type embeddedTypeName struct {
 // receiver.
 type methodMap map[string][]*MethodSpec
 
-// Parse the app controllers directory and return a list of the controller types found.
-// Returns a CompileError if the parsing fails.
+// ProcessSource parses the app's controllers directory and return a list of
+// the controller types found. Returns a CompileError if the parsing fails.
 func ProcessSource(path string) (*SourceInfo, error) {
 	// Parse files within the path.
 	fset := token.NewFileSet()
@@ -105,7 +106,7 @@ func ProcessSource(path string) (*SourceInfo, error) {
 	if len(pkgs) == 0 {
 		return nil, nil
 	} else if len(pkgs) > 1 {
-		return nil, errors.New(fmt.Sprintf("Most unexpected! Multiple packages in a single directory: %s", path))
+		return nil, fmt.Errorf("Most unexpected! Multiple packages in a single directory: %s", path)
 	}
 
 	var pkg *ast.Package
@@ -116,6 +117,8 @@ func ProcessSource(path string) (*SourceInfo, error) {
 	return processPackage(fset, pkg.Name, path, pkg), nil
 }
 
+// ProcessFile created a SourceInfo data structure similarly to ProcessSource,
+// but for a single file.
 func ProcessFile(fset *token.FileSet, fileName string, file *ast.File) *SourceInfo {
 	pkg := &ast.Package{
 		Name:  file.Name.Name,
@@ -369,7 +372,7 @@ func appendAction(fset *token.FileSet, mm methodMap, decl ast.Decl, pkgImportPat
 	}
 
 	var recvTypeName string
-	var recvType ast.Expr = funcDecl.Recv.List[0].Type
+	recvType := funcDecl.Recv.List[0].Type
 	if recvStarType, ok := recvType.(*ast.StarExpr); ok {
 		recvTypeName = recvStarType.X.(*ast.Ident).Name
 	} else {
@@ -444,6 +447,8 @@ func (s *SourceInfo) TypesThatEmbed(targetType string) (filtered []*TypeInfo) {
 	return
 }
 
+// ControllerSpecs returns all types are therefore regarded as controller
+// because they (transitively) embed mars.Controller.
 func (s *SourceInfo) ControllerSpecs() []*TypeInfo {
 	if s.controllerSpecs == nil {
 		s.controllerSpecs = s.TypesThatEmbed(mars.MarsImportPath + ".Controller")
@@ -469,12 +474,12 @@ func (e TypeExpr) TypeName(pkgOverride string) string {
 	return e.Expr[:e.pkgIndex] + pkgName + "." + e.Expr[e.pkgIndex:]
 }
 
-// Looks through all the method args and returns a set of unique import paths
-// that cover all the method arg types.
-// Additionally, assign package aliases when necessary to resolve ambiguity.
-func (src *SourceInfo) CalcImportAliases() map[string]string {
+// CalcImportAliases looks through all the method args and returns a set of
+// unique import paths that cover all the method arg types. Additionally,
+// assign package aliases when necessary to resolve ambiguity.
+func (s *SourceInfo) CalcImportAliases() map[string]string {
 	aliases := make(map[string]string)
-	for _, spec := range src.ControllerSpecs() {
+	for _, spec := range s.ControllerSpecs() {
 		//addAlias(aliases, spec.ImportPath, spec.PackageName)
 
 		for _, methSpec := range spec.MethodSpecs {
@@ -488,7 +493,7 @@ func (src *SourceInfo) CalcImportAliases() map[string]string {
 	}
 
 	// Add the "InitImportPaths", with alias "_"
-	for _, importPath := range src.InitImportPaths {
+	for _, importPath := range s.InitImportPaths {
 		if _, ok := aliases[importPath]; !ok {
 			aliases[importPath] = "_"
 		}
@@ -525,11 +530,11 @@ func containsValue(m map[string]string, val string) bool {
 	return false
 }
 
-// This returns the syntactic expression for referencing this type in Go.
+// NewTypeExpr returns the syntactic expression for referencing this type in Go.
 func NewTypeExpr(pkgName string, expr ast.Expr) TypeExpr {
 	switch t := expr.(type) {
 	case *ast.Ident:
-		if IsBuiltinType(t.Name) {
+		if _, ok := builtinTypes[t.Name]; ok {
 			pkgName = ""
 		}
 		return TypeExpr{t.Name, pkgName, 0, true}
@@ -551,7 +556,7 @@ func NewTypeExpr(pkgName string, expr ast.Expr) TypeExpr {
 	return TypeExpr{Valid: false}
 }
 
-var _BUILTIN_TYPES = map[string]struct{}{
+var builtinTypes = map[string]struct{}{
 	"bool":       struct{}{},
 	"byte":       struct{}{},
 	"complex128": struct{}{},
@@ -572,9 +577,4 @@ var _BUILTIN_TYPES = map[string]struct{}{
 	"uint64":     struct{}{},
 	"uint8":      struct{}{},
 	"uintptr":    struct{}{},
-}
-
-func IsBuiltinType(name string) bool {
-	_, ok := _BUILTIN_TYPES[name]
-	return ok
 }
