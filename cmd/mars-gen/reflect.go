@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/roblillack/mars"
@@ -538,6 +539,8 @@ func NewTypeExpr(pkgName string, expr ast.Expr) TypeExpr {
 			pkgName = ""
 		}
 		return TypeExpr{t.Name, pkgName, 0, true}
+	case *ast.InterfaceType:
+		return TypeExpr{"interface{}", "", 0, true}
 	case *ast.SelectorExpr:
 		e := NewTypeExpr(pkgName, t.X)
 		return TypeExpr{t.Sel.Name, e.Expr, 0, e.Valid}
@@ -545,13 +548,11 @@ func NewTypeExpr(pkgName string, expr ast.Expr) TypeExpr {
 		e := NewTypeExpr(pkgName, t.X)
 		return TypeExpr{"*" + e.Expr, e.PkgName, e.pkgIndex + 1, e.Valid}
 	case *ast.ArrayType:
-		e := NewTypeExpr(pkgName, t.Elt)
-		return TypeExpr{"[]" + e.Expr, e.PkgName, e.pkgIndex + 2, e.Valid}
 	case *ast.Ellipsis:
 		e := NewTypeExpr(pkgName, t.Elt)
 		return TypeExpr{"[]" + e.Expr, e.PkgName, e.pkgIndex + 2, e.Valid}
 	default:
-		log.Println("Failed to generate name for field. Make sure the field name is valid.")
+		log.Printf("Failed to generate name for field: %s. Make sure the field name is valid.\n", reflect.TypeOf(expr))
 	}
 	return TypeExpr{Valid: false}
 }
