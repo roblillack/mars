@@ -26,6 +26,7 @@ The major changes since forking away from Revel are these:
 - Removed the cache library.
 - Removed module support.
 - Corrected case of render functions (`RenderXml` --> `RenderXML`).
+- Fix generating reverse routes for some edge cases: Action parameter is called `args` or action parameter is of type `interface{}`.
 
 ## Links
 - [Code Coverage](http://gocover.io/github.com/roblillack/mars)
