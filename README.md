@@ -25,6 +25,7 @@ The major changes since forking away from Revel are these:
 - Removed magic that automatically added template parameter names based on variable names in `Controller.Render()` calls using code generation and runtime introspection.
 - Removed the cache library.
 - Removed module support.
+- Corrected case of render functions (`RenderXml` --> `RenderXML`).
 
 ## Links
 - [Code Coverage](http://gocover.io/github.com/roblillack/mars)
