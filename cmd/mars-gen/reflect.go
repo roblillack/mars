@@ -93,12 +93,8 @@ func ProcessSource(path string) (*SourceInfo, error) {
 	// Parse files within the path.
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, path, func(f os.FileInfo) bool {
-		fmt.Println("checking", f.Name())
 		return !f.IsDir() && !strings.HasPrefix(f.Name(), ".") && strings.HasSuffix(f.Name(), ".go")
 	}, 0)
-	for k, v := range pkgs {
-		fmt.Println(k, ":", v)
-	}
 	if err != nil {
 		return nil, err
 	}
@@ -156,9 +152,7 @@ func processPackage(fset *token.FileSet, pkgImportPath, pkgPath string, pkg *ast
 
 	// Add the method specs to the struct specs.
 	for _, spec := range structSpecs {
-		//fmt.Println(spec)
 		spec.MethodSpecs = methodSpecs[spec.StructName]
-		fmt.Println(spec)
 	}
 
 	return &SourceInfo{
