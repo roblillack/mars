@@ -8,10 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"strings"
 	"time"
 )
+
+type Args map[string]interface{}
 
 type Controller struct {
 	Name          string          // The controller name, e.g. "Application"
@@ -25,12 +26,12 @@ type Controller struct {
 	Response *Response
 	Result   Result
 
-	Flash      Flash                  // User cookie, cleared after 1 request.
-	Session    Session                // Session, stored in cookie, signed.
-	Params     *Params                // Parameters from URL and form (including multipart).
-	Args       map[string]interface{} // Per-request scratch space.
-	RenderArgs map[string]interface{} // Args passed to the template.
-	Validation *Validation            // Data validation helpers
+	Flash      Flash       // User cookie, cleared after 1 request.
+	Session    Session     // Session, stored in cookie, signed.
+	Params     *Params     // Parameters from URL and form (including multipart).
+	Args       Args        // Per-request scratch space.
+	RenderArgs Args        // Args passed to the template.
+	Validation *Validation // Data validation helpers
 }
 
 func NewController(req *Request, resp *Response) *Controller {
@@ -71,40 +72,21 @@ func (c *Controller) setStatusIfNil(status int) {
 }
 
 // Render a template corresponding to the calling Controller method.
-// Arguments will be added to c.RenderArgs prior to rendering the template.
-// They are keyed on their local identifier.
 //
 // For example:
 //
 //     func (c Users) ShowUser(id int) mars.Result {
-//     	 user := loadUser(id)
-//     	 return c.Render(user)
+//     	 return c.Render(map[string]interface{}{"user": loadUser(id)})
 //     }
 //
 // This action will render views/Users/ShowUser.html, passing in an extra
 // key-value "user": (User).
-func (c *Controller) Render(extraRenderArgs ...interface{}) Result {
-	// Get the calling function name.
-	_, _, line, ok := runtime.Caller(1)
-	if !ok {
-		ERROR.Println("Failed to get Caller information")
-	}
-
-	// Get the extra RenderArgs passed in.
-	if renderArgNames, ok := c.MethodType.RenderArgNames[line]; ok {
-		if len(renderArgNames) == len(extraRenderArgs) {
-			for i, extraRenderArg := range extraRenderArgs {
-				c.RenderArgs[renderArgNames[i]] = extraRenderArg
-			}
-		} else {
-			ERROR.Println(len(renderArgNames), "RenderArg names found for",
-				len(extraRenderArgs), "extra RenderArgs")
+func (c *Controller) Render(extraRenderArgs ...Args) Result {
+	for _, args := range extraRenderArgs {
+		for k, v := range args {
+			c.RenderArgs[k] = v
 		}
-	} else {
-		ERROR.Println("No RenderArg names found for Render call on line", line,
-			"(Action", c.Action, ")")
 	}
-
 	return c.RenderTemplate(c.Name + "/" + c.MethodType.Name + "." + c.Request.Format)
 }
 
@@ -353,10 +335,9 @@ type ControllerType struct {
 }
 
 type MethodType struct {
-	Name           string
-	Args           []*MethodArg
-	RenderArgNames map[int][]string
-	lowerName      string
+	Name      string
+	Args      []*MethodArg
+	lowerName string
 }
 
 type MethodArg struct {

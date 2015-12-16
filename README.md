@@ -22,6 +22,7 @@ The major changes since forking away from Revel are these:
 - Added support for Go 1.5 vendor experiment.
 - Vendor Mars' dependencies as Git submodules.
 - Integrated `Static` controller to support hosting plain HTML files and assets.
+- Removed magic that automatically added template parameter names based on variable names in `Controller.Render()` calls using code generation and runtime introspection.
 - Removed the cache library.
 - Removed module support.
 
