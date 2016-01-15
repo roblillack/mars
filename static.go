@@ -1,6 +1,7 @@
 package mars
 
 import (
+	"fmt"
 	"os"
 	fpath "path/filepath"
 	"reflect"
@@ -16,13 +17,21 @@ func init() {
 	RegisterController((*Static)(nil),
 		[]*MethodType{
 			&MethodType{
+				Name: "ServeFresh",
+				Args: []*MethodArg{
+					&MethodArg{Name: "prefix", Type: reflect.TypeOf((*string)(nil))},
+					&MethodArg{Name: "filepath", Type: reflect.TypeOf((*string)(nil))},
+				},
+			},
+			&MethodType{
 				Name: "Serve",
 				Args: []*MethodArg{
 					&MethodArg{Name: "prefix", Type: reflect.TypeOf((*string)(nil))},
 					&MethodArg{Name: "filepath", Type: reflect.TypeOf((*string)(nil))},
 				},
 			},
-		})
+		},
+	)
 }
 
 // This method handles requests for files. The supplied prefix may be absolute
@@ -55,6 +64,16 @@ func init() {
 //     favicon.ico
 //   Calls:
 //     Static.Serve("public/img", "favicon.png")
+func (c Static) ServeFresh(prefix, filepath string) Result {
+	// Fix for #503.
+	prefix = c.Params.Fixed.Get("prefix")
+	if prefix == "" {
+		return c.NotFound("")
+	}
+
+	return serve(c, prefix, filepath, -1)
+}
+
 func (c Static) Serve(prefix, filepath string) Result {
 	// Fix for #503.
 	prefix = c.Params.Fixed.Get("prefix")
@@ -62,11 +81,11 @@ func (c Static) Serve(prefix, filepath string) Result {
 		return c.NotFound("")
 	}
 
-	return serve(c, prefix, filepath)
+	return serve(c, prefix, filepath, int(MaxAge.Seconds()))
 }
 
 // This method allows static serving of application files in a verified manner.
-func serve(c Static, prefix, filepath string) Result {
+func serve(c Static, prefix, filepath string, maxAge int) Result {
 	var basePath string
 	if !fpath.IsAbs(prefix) {
 		basePath = BasePath
@@ -107,5 +126,10 @@ func serve(c Static, prefix, filepath string) Result {
 		ERROR.Printf("Error opening '%s': %s", fname, err)
 		return c.RenderError(err)
 	}
+
+	if maxAge > 0 {
+		c.Response.Out.Header().Add("Cache-Control", fmt.Sprintf("max-age=%d, must-revalidate", maxAge))
+	}
+
 	return c.RenderFile(file, Inline)
 }
