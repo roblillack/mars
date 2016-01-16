@@ -222,16 +222,6 @@ func (loader *TemplateLoader) Refresh() *Error {
 		return err
 	}
 
-	for _, i := range AssetNames() {
-		lowerTemplateName := strings.ToLower(i)
-		if raw, err := Asset(i); err == nil {
-			if _, err := loader.templateSet.New(i).Parse(string(raw)); err == nil {
-				loader.templatePaths[i] = ""
-				loader.templateNames[lowerTemplateName] = i
-			}
-		}
-	}
-
 	// Walk through the template loader's paths and build up a template set.
 	for _, basePath := range loader.paths {
 		// Walk only returns an error if the template loader is completely unusable
@@ -356,6 +346,24 @@ func (loader *TemplateLoader) Refresh() *Error {
 		if funcErr != nil {
 			loader.compileError = funcErr.(*Error)
 			return loader.compileError
+		}
+	}
+
+	for _, i := range AssetNames() {
+		lowerTemplateName := strings.ToLower(i)
+		// If we already loaded a template of this name, skip it.
+		if _, ok := loader.templateNames[lowerTemplateName]; ok {
+			continue
+		}
+
+		if raw, err := Asset(i); err == nil {
+			TRACE.Println("adding embedded template: ", i)
+			if _, err := loader.templateSet.New(i).Parse(string(raw)); err != nil {
+				ERROR.Printf("Error compiling embedded template %s: %s\n", i, err)
+				continue
+			}
+			loader.templatePaths[i] = ""
+			loader.templateNames[lowerTemplateName] = i
 		}
 	}
 
