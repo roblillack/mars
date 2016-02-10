@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/roblillack/mars"
@@ -53,6 +54,20 @@ func (info TypeInfo) String() string {
 		str += "\n  - " + i.String()
 	}
 	return str
+}
+
+type TypeInfosByName []*TypeInfo
+
+func (slice TypeInfosByName) Len() int {
+	return len(slice)
+}
+
+func (slice TypeInfosByName) Less(i, j int) bool {
+	return slice[i].StructName < slice[j].StructName
+}
+
+func (slice TypeInfosByName) Swap(i, j int) {
+	slice[i], slice[j] = slice[j], slice[i]
 }
 
 // MethodSpec represents a method defined for a receiver type represented by TypeInfo.
@@ -448,6 +463,8 @@ func (s *SourceInfo) ControllerSpecs() []*TypeInfo {
 	if s.controllerSpecs == nil {
 		s.controllerSpecs = s.TypesThatEmbed(mars.MarsImportPath + ".Controller")
 	}
+
+	sort.Sort(TypeInfosByName(s.controllerSpecs))
 	return s.controllerSpecs
 }
 
