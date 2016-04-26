@@ -81,8 +81,6 @@ var (
 
 	MaxAge = time.Hour * 24 // MaxAge specifies the time browsers shall cache static content served using Static.Serve
 
-	Initialized bool
-
 	// Private
 	secretKey []byte // Key used to sign cookies. An empty key disables signing.
 )
@@ -164,7 +162,6 @@ func InitDefaults(mode, basePath string) {
 	MainTemplateLoader = NewTemplateLoader([]string{path.Join(BasePath, "views")})
 	MainTemplateLoader.Refresh()
 
-	Initialized = true
 	INFO.Printf("Initialized Mars v%s (%s) for %s", VERSION, BUILD_DATE, MINIMUM_GO)
 }
 
