@@ -210,32 +210,3 @@ func getLogger(name string) *log.Logger {
 func newLogger(wr io.Writer) *log.Logger {
 	return log.New(wr, "", INFO.Flags())
 }
-
-// ResolveImportPath returns the filesystem path for the given import path.
-// Returns an error if the import path could not be found.
-func ResolveImportPath(importPath string) (string, error) {
-	// GO15VENDOREXPERIMENT
-	var err error
-	var modPkg *build.Package
-	for _, p := range []string{
-		importPath,
-		path.Join(ImportPath, "vendor", importPath),
-		path.Join(MarsImportPath, "vendor", importPath)} {
-		modPkg, err = build.Import(p, "", build.FindOnly)
-		if err == nil {
-			break
-		}
-	}
-
-	if err != nil {
-		return "", err
-	}
-
-	return modPkg.Dir, nil
-}
-
-func CheckInit() {
-	if !Initialized {
-		panic("Mars has not been initialized!")
-	}
-}
