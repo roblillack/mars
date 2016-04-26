@@ -58,6 +58,7 @@ The major changes since forking away from Revel are these:
 
    import (
        "flag"
+       "path"
        "github.com/mycompany/myapp/controllers"
        "github.com/roblillack/mars"
    )
@@ -67,20 +68,19 @@ The major changes since forking away from Revel are these:
        mode := flag.String("m", "prod", "Runtime mode to select (default: prod)")
        flag.Parse()
 
-       if *port == -1 {
-           *port = mars.HttpPort
-       }
-
-       mars.InitDefaults(mode, ".")
-       mars.DevMode = mode == "dev"
-
-       // That's the function mars-gen register-controllers generated
+       // This is the function `mars-gen register-controllers` generates:
        controllers.RegisterControllers()
 
-       // The setup of the default router will probably be moved to mars.InitDefaults() sometime
-       mars.MainRouter = mars.NewRouter(path.Join("conf", "routes"))
-       if err := mars.MainRouter.Refresh(); err != nil {
-           mars.ERROR.Fatalln(err.Error())
+       // Setup some paths to be compatible with the Revel way. Default is not to have an "app" directory below BasePath
+       mars.ViewsPath = path.Join("app", "views")
+       mars.ConfigFile = path.Join("app", "conf", "app.conf")
+       mars.RoutesFile = path.Join("app", "conf", "routes")
+
+       // Reads the config, sets up template loader, creates router
+       mars.InitDefaults(mode, ".")
+
+       if *port == -1 {
+           *port = mars.HttpPort
        }
 
        mars.Run(*port)

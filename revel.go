@@ -28,17 +28,25 @@ func (r *marsLogs) Write(p []byte) (n int, err error) {
 }
 
 var (
-	// App details
-	AppName    string // e.g. "sample"
-	AppRoot    string // e.g. "/app1"
-	BasePath   string // e.g. "/Users/robfig/gocode/src/corp/sample"
-	
+	// ConfigFile specifies the path of the main configuration file relative to BasePath, e.g. "conf/app.conf"
 	ConfigFile = path.Join("conf", "app.conf")
+	// MimeTypesFile specifies the path of the optional MIME type configuration file relative to BasePath, e.g. "conf/mime-types.conf"
+	MimeTypesFile = path.Join("conf", "mime-types.conf")
+	// RoutesFile specified the path of the route configuration file relative to BasePath, e.g. "conf/routes"
+	RoutesFile = path.Join("conf", "routes")
+	// ViewPath specifies the name of directory where all the templates are located relative to BasePath, e.g. "views"
+	ViewsPath = "views"
 
-	Config     *MergedConfig
-	MimeConfig *MergedConfig
-	RunMode    string // Application-defined (by default, "dev" or "prod")
-	DevMode    bool   // if true, RunMode is a development mode.
+	Config     = NewEmptyConfig()
+	MimeConfig = NewEmptyConfig()
+
+	// App details
+	AppName  = "(not set)" // e.g. "sample"
+	AppRoot  = ""          // e.g. "/app1"
+	BasePath = "."         // e.g. "/Users/robfig/gocode/src/corp/sample"
+
+	RunMode = "prod"
+	DevMode = false
 
 	// Server config.
 	//
@@ -46,22 +54,22 @@ var (
 	// the current process reality.  For example, if the app is configured for
 	// port 9000, HttpPort will always be 9000, even though in dev mode it is
 	// run on a random port and proxied.
-	HttpPort    int    // e.g. 9000
-	HttpAddr    string // e.g. "", "127.0.0.1"
-	HttpSsl     bool   // e.g. true if using ssl
-	HttpSslCert string // e.g. "/path/to/cert.pem"
-	HttpSslKey  string // e.g. "/path/to/key.pem"
+	HttpPort    = 9000
+	HttpAddr    = ""    // e.g. "", "127.0.0.1"
+	HttpSsl     = false // e.g. true if using ssl
+	HttpSslCert = ""    // e.g. "/path/to/cert.pem"
+	HttpSslKey  = ""    // e.g. "/path/to/key.pem"
 
 	// All cookies dropped by the framework begin with this prefix.
-	CookiePrefix string
+	CookiePrefix = "MARS"
 	// Cookie domain
-	CookieDomain string
+	CookieDomain = ""
 	// Cookie flags
-	CookieHttpOnly bool
-	CookieSecure   bool
+	CookieHttpOnly = false
+	CookieSecure   = false
 
 	// Delimiters to use when rendering templates
-	TemplateDelims string
+	TemplateDelims = ""
 
 	//Logger colors
 	colors = map[string]gocolorize.Colorize{
@@ -84,6 +92,10 @@ var (
 	// Private
 	secretKey []byte // Key used to sign cookies. An empty key disables signing.
 )
+
+func SetAppSecret(secret string) {
+	secretKey = []byte(secret)
+}
 
 func init() {
 	log.SetFlags(INFO.Flags())
@@ -110,7 +122,7 @@ func InitDefaults(mode, basePath string) {
 		log.Fatalln("Failed to load app.conf:", err)
 	}
 
-	MimeConfig, _ = LoadConfig(path.Join(BasePath, "conf", "mime-types.conf"))
+	MimeConfig, _ = LoadConfig(path.Join(BasePath, MimeTypesFile))
 
 	// Ensure that the selected runmode appears in app.conf.
 	// If empty string is passed as the mode, treat it as "DEFAULT"
@@ -123,12 +135,13 @@ func InitDefaults(mode, basePath string) {
 	Config.SetSection(mode)
 
 	// Configure properties from app.conf
-	DevMode = Config.BoolDefault("mode.dev", false)
-	HttpPort = Config.IntDefault("http.port", 9000)
-	HttpAddr = Config.StringDefault("http.addr", "")
-	HttpSsl = Config.BoolDefault("http.ssl", false)
-	HttpSslCert = Config.StringDefault("http.sslcert", "")
-	HttpSslKey = Config.StringDefault("http.sslkey", "")
+	DevMode = Config.BoolDefault("mode.dev", DevMode)
+	HttpPort = Config.IntDefault("http.port", HttpPort)
+	HttpAddr = Config.StringDefault("http.addr", HttpAddr)
+	HttpSsl = Config.BoolDefault("http.ssl", HttpSsl)
+	HttpSslCert = Config.StringDefault("http.sslcert", HttpSslCert)
+	HttpSslKey = Config.StringDefault("http.sslkey", HttpSslKey)
+
 	if HttpSsl {
 		if HttpSslCert == "" {
 			log.Fatalln("No http.sslcert provided.")
@@ -138,15 +151,16 @@ func InitDefaults(mode, basePath string) {
 		}
 	}
 
-	AppName = Config.StringDefault("app.name", "(not set)")
-	AppRoot = Config.StringDefault("app.root", "")
-	CookiePrefix = Config.StringDefault("cookie.prefix", "MARS")
-	CookieDomain = Config.StringDefault("cookie.domain", "")
-	CookieHttpOnly = Config.BoolDefault("cookie.httponly", false)
-	CookieSecure = Config.BoolDefault("cookie.secure", false)
-	TemplateDelims = Config.StringDefault("template.delimiters", "")
-	if secretStr := Config.StringDefault("app.secret", ""); secretStr != "" {
-		secretKey = []byte(secretStr)
+	AppName = Config.StringDefault("app.name", AppName)
+	AppRoot = Config.StringDefault("app.root", AppRoot)
+	CookiePrefix = Config.StringDefault("cookie.prefix", CookiePrefix)
+	CookieDomain = Config.StringDefault("cookie.domain", CookieDomain)
+	CookieHttpOnly = Config.BoolDefault("cookie.httponly", CookieHttpOnly)
+	CookieSecure = Config.BoolDefault("cookie.secure", CookieSecure)
+	TemplateDelims = Config.StringDefault("template.delimiters", TemplateDelims)
+
+	if s := Config.StringDefault("app.secret", ""); s != "" {
+		SetAppSecret(s)
 	}
 
 	// Configure logging
@@ -159,10 +173,26 @@ func InitDefaults(mode, basePath string) {
 	WARN = getLogger("warn")
 	ERROR = getLogger("error")
 
-	MainTemplateLoader = NewTemplateLoader([]string{path.Join(BasePath, "views")})
-	MainTemplateLoader.Refresh()
+	SetupViews()
+	SetupRouter()
 
 	INFO.Printf("Initialized Mars v%s (%s) for %s", VERSION, BUILD_DATE, MINIMUM_GO)
+}
+
+// SetupViews will create a template loader for all the templates provided in ViewsPath
+func SetupViews() {
+	MainTemplateLoader = NewTemplateLoader([]string{path.Join(BasePath, ViewsPath)})
+	MainTemplateLoader.Refresh()
+}
+
+// SetupRouter will create the router of the application based on the information
+// provided in RoutesFile and the controllers and actions which have been registered
+// using RegisterController.
+func SetupRouter() {
+	MainRouter = NewRouter(path.Join(BasePath, RoutesFile))
+	if err := MainRouter.Refresh(); err != nil {
+		ERROR.Fatalln(err.Error())
+	}
 }
 
 // Create a logger using log.* directives in app.conf plus the current settings
