@@ -58,15 +58,6 @@ func (c MyStatic) Serve(prefix, filepath string) Result {
 }
 
 func startFakeBookingApp() {
-	InitDefaults("prod", "testdata")
-
-	// Disable logging.
-	_ = ioutil.Discard
-	TRACE = log.New(os.Stderr, "", 0)
-	INFO = TRACE
-	WARN = TRACE
-	ERROR = TRACE
-
 	RegisterController((*Hotels)(nil),
 		[]*MethodType{
 			&MethodType{
@@ -97,13 +88,14 @@ func startFakeBookingApp() {
 			},
 		})
 
-	MainRouter = NewRouter(path.Join(BasePath, "conf", "routes"))
-	err := MainRouter.Refresh()
+	// Disable logging.
+	_ = ioutil.Discard
+	TRACE = log.New(os.Stderr, "", 0)
+	INFO = TRACE
+	WARN = TRACE
+	ERROR = TRACE
 
-	if err != nil {
-		// Not in dev mode and Route loading failed, we should crash.
-		ERROR.Panicln(err.Error())
-	}
+	InitDefaults("prod", "testdata")
 
 	runStartupHooks()
 }
