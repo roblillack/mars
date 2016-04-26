@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	MarsImportPath = "github.com/roblillack/mars"
+	MarsImportPath     = "github.com/roblillack/mars"
+	defaultLoggerFlags = log.Ldate | log.Ltime | log.Lshortfile
 )
 
 type marsLogs struct {
@@ -79,13 +80,13 @@ var (
 		"error": gocolorize.NewColor("red"),
 	}
 
-	error_log = marsLogs{c: colors["error"], w: os.Stderr}
-
 	// Loggers
-	TRACE = log.New(ioutil.Discard, "TRACE ", log.Ldate|log.Ltime|log.Lshortfile)
-	INFO  = log.New(ioutil.Discard, "INFO  ", log.Ldate|log.Ltime|log.Lshortfile)
-	WARN  = log.New(ioutil.Discard, "WARN  ", log.Ldate|log.Ltime|log.Lshortfile)
-	ERROR = log.New(&error_log, "ERROR ", log.Ldate|log.Ltime|log.Lshortfile)
+	DisabledLogger = log.New(ioutil.Discard, "", 0)
+
+	TRACE = DisabledLogger
+	INFO  = log.New(&marsLogs{c: colors["info"], w: os.Stderr}, "INFO  ", defaultLoggerFlags)
+	WARN  = log.New(&marsLogs{c: colors["warn"], w: os.Stderr}, "WARN  ", defaultLoggerFlags)
+	ERROR = log.New(&marsLogs{c: colors["error"], w: os.Stderr}, "ERROR ", defaultLoggerFlags)
 
 	MaxAge = time.Hour * 24 // MaxAge specifies the time browsers shall cache static content served using Static.Serve
 
@@ -98,7 +99,7 @@ func SetAppSecret(secret string) {
 }
 
 func init() {
-	log.SetFlags(INFO.Flags())
+	log.SetFlags(defaultLoggerFlags)
 }
 
 // InitDefaults initializes Mars based on runtime-loading of config files.
@@ -168,10 +169,10 @@ func InitDefaults(mode, basePath string) {
 		gocolorize.SetPlain(true)
 	}
 
-	TRACE = getLogger("trace")
-	INFO = getLogger("info")
-	WARN = getLogger("warn")
-	ERROR = getLogger("error")
+	TRACE = getLogger("trace", TRACE)
+	INFO = getLogger("info", INFO)
+	WARN = getLogger("warn", WARN)
+	ERROR = getLogger("error", ERROR)
 
 	SetupViews()
 	SetupRouter()
@@ -197,25 +198,22 @@ func SetupRouter() {
 
 // Create a logger using log.* directives in app.conf plus the current settings
 // on the default logger.
-func getLogger(name string) *log.Logger {
+func getLogger(name string, original *log.Logger) *log.Logger {
 	var logger *log.Logger
 
 	// Create a logger with the requested output. (default to stderr)
-	output := Config.StringDefault("log."+name+".output", "stderr")
-	var newlog marsLogs
+	output := Config.StringDefault("log."+name+".output", "")
 
 	switch output {
+	case "":
+		return original
 	case "stdout":
-		newlog = marsLogs{c: colors[name], w: os.Stdout}
-		logger = newLogger(&newlog)
+		logger = newLogger(&marsLogs{c: colors[name], w: os.Stdout})
 	case "stderr":
-		newlog = marsLogs{c: colors[name], w: os.Stderr}
-		logger = newLogger(&newlog)
+		logger = newLogger(&marsLogs{c: colors[name], w: os.Stderr})
+	case "off":
+		return DisabledLogger
 	default:
-		if output == "off" {
-			output = os.DevNull
-		}
-
 		file, err := os.OpenFile(output, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			log.Fatalln("Failed to open log file", output, ":", err)
@@ -238,5 +236,5 @@ func getLogger(name string) *log.Logger {
 }
 
 func newLogger(wr io.Writer) *log.Logger {
-	return log.New(wr, "", INFO.Flags())
+	return log.New(wr, "", defaultLoggerFlags)
 }
