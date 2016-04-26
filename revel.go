@@ -1,9 +1,6 @@
 package mars
 
 import (
-	"github.com/agtorre/gocolorize"
-	"github.com/robfig/config"
-	"go/build"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,6 +9,9 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/agtorre/gocolorize"
+	"github.com/robfig/config"
 )
 
 const (
@@ -32,17 +32,13 @@ var (
 	AppName    string // e.g. "sample"
 	AppRoot    string // e.g. "/app1"
 	BasePath   string // e.g. "/Users/robfig/gocode/src/corp/sample"
-	ImportPath string // e.g. "corp/sample"
+	
+	ConfigFile = path.Join("conf", "app.conf")
 
 	Config     *MergedConfig
 	MimeConfig *MergedConfig
 	RunMode    string // Application-defined (by default, "dev" or "prod")
 	DevMode    bool   // if true, RunMode is a development mode.
-
-	// Where to look for templates and configuration.
-	// Ordered by priority.  (Earlier paths take precedence over later paths.)
-	CodePaths []string
-	ConfPaths []string
 
 	// Server config.
 	//
@@ -108,16 +104,10 @@ func InitDefaults(mode, basePath string) {
 	}
 
 	BasePath = filepath.FromSlash(basePath)
-	ConfPaths = []string{path.Join(BasePath, "conf")}
-
-	/*
-		fmt.Println("RunMode", RunMode)
-		fmt.Println("BasePath", BasePath)
-	*/
 
 	// Load app.conf
 	var err error
-	Config, err = LoadConfig(path.Join(BasePath, "conf", "app.conf"))
+	Config, err = LoadConfig(path.Join(BasePath, ConfigFile))
 	if err != nil || Config == nil {
 		log.Fatalln("Failed to load app.conf:", err)
 	}
