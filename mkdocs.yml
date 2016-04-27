@@ -1,0 +1,8 @@
+site_name: Mars documentation
+pages:
+- Home: index.md
+- Getting Started: getting-started.md
+- Migrating from Revel: migration.md
+- Code generation: code-generation.md
+- F.A.Q.: faq.md
+theme: readthedocs
