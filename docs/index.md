@@ -11,6 +11,7 @@ Mars provides the following functionality:
 ## Differences to Revel
 
 The major changes since forking away from Revel are these:
+
 - More idiomatic approach to integrating the framework into your application:
     + No need to use the `revel` command to build, run, package, or distribute your app.
     + Code generation (for registering controllers and reverse routes) is supported using the standard `go generate` way.

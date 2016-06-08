@@ -17,43 +17,42 @@
    `c.Validation.Required(email).Key("email")`
 5. Install mars-gen using `go get github.com/roblillack/mars/cmd/mars-gen` and set it up for
    controller registration and reverse route generation by adding comments like these to one of Go files:
-   ```
-//go:generate mars-gen register-controllers ./controllers
-//go:generate mars-gen reverse-routes -n routes -o routes/routes.gen.go ./controllers
-   ```
+
+        //go:generate mars-gen register-controllers ./controllers
+        //go:generate mars-gen reverse-routes -n routes -o routes/routes.gen.go ./controllers
+
    Make sure to check in the generated sources, too. Run `mars-gen --help` for usage info.
 6. Setup a main entry point for your server, for example like this:
-   ```
-   package main
 
-   import (
-       "flag"
-       "path"
-       "github.com/mycompany/myapp/controllers"
-       "github.com/roblillack/mars"
-   )
+       package main
 
-   func main() {
-       port := flag.Int("p", -1, "Port to listen on (default: use mars config)")
-       mode := flag.String("m", "prod", "Runtime mode to select (default: prod)")
-       flag.Parse()
+       import (
+           "flag"
+           "path"
+           "github.com/mycompany/myapp/controllers"
+           "github.com/roblillack/mars"
+       )
 
-       // This is the function `mars-gen register-controllers` generates:
-       controllers.RegisterControllers()
+       func main() {
+           port := flag.Int("p", -1, "Port to listen on (default: use mars config)")
+           mode := flag.String("m", "prod", "Runtime mode to select (default: prod)")
+           flag.Parse()
 
-       // Setup some paths to be compatible with the Revel way. Default is not to have an "app" directory below BasePath
-       mars.ViewsPath = path.Join("app", "views")
-       mars.ConfigFile = path.Join("app", "conf", "app.conf")
-       mars.RoutesFile = path.Join("app", "conf", "routes")
+           // This is the function `mars-gen register-controllers` generates:
+           controllers.RegisterControllers()
 
-       // Reads the config, sets up template loader, creates router
-       mars.InitDefaults(mode, ".")
+           // Setup some paths to be compatible with the Revel way. Default is not to have an "app" directory below BasePath
+           mars.ViewsPath = path.Join("app", "views")
+           mars.ConfigFile = path.Join("app", "conf", "app.conf")
+           mars.RoutesFile = path.Join("app", "conf", "routes")
 
-       if *port == -1 {
-           *port = mars.HttpPort
+           // Reads the config, sets up template loader, creates router
+           mars.InitDefaults(mode, ".")
+
+           if *port == -1 {
+               *port = mars.HttpPort
+           }
+
+           mars.Run(*port)
        }
-
-       mars.Run(*port)
-   }
-   ```
 7. Run `go generate && go build && ./myapp` and be happy.
