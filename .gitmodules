@@ -6,13 +6,17 @@ url = https://github.com/Masterminds/glide.git
 path = vendor/golang.org/x/net
 url = https://github.com/golang/net.git
 
+[submodule "sys"]
+path = vendor/golang.org/x/sys
+url = https://github.com/golang/sys.git
+
 [submodule "gocolorize"]
 path = vendor/github.com/agtorre/gocolorize
 url = https://github.com/agtorre/gocolorize.git
 
 [submodule "fsnotify"]
-path = vendor/gopkg.in/fsnotify.v1
-url = https://github.com/go-fsnotify/fsnotify.git
+path = vendor/github.com/fsnotify/fsnotify
+url = https://github.com/fsnotify/fsnotify.git
 
 [submodule "config"]
 path = vendor/github.com/robfig/config
