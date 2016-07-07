@@ -1,12 +1,13 @@
 package mars
 
 import (
-	"gopkg.in/fsnotify.v1"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 // Listener is an interface for receivers of filesystem events.
