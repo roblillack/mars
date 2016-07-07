@@ -1,35 +1,35 @@
 [submodule "glide"]
 path = vendor/github.com/Masterminds/glide
-url = https://github.com/Masterminds/glide.git
+url = https://github.com/Masterminds/glide
 
 [submodule "net"]
 path = vendor/golang.org/x/net
-url = https://github.com/golang/net.git
+url = https://github.com/golang/net
 
 [submodule "sys"]
 path = vendor/golang.org/x/sys
-url = https://github.com/golang/sys.git
+url = https://github.com/golang/sys
 
 [submodule "gocolorize"]
 path = vendor/github.com/agtorre/gocolorize
-url = https://github.com/agtorre/gocolorize.git
+url = https://github.com/agtorre/gocolorize
 
 [submodule "fsnotify"]
 path = vendor/github.com/fsnotify/fsnotify
-url = https://github.com/fsnotify/fsnotify.git
+url = https://github.com/fsnotify/fsnotify
 
 [submodule "config"]
 path = vendor/github.com/robfig/config
-url = https://github.com/robfig/config.git
+url = https://github.com/robfig/config
 
 [submodule "pathtree"]
 path = vendor/github.com/robfig/pathtree
-url = https://github.com/robfig/pathtree.git
+url = https://github.com/robfig/pathtree
 
 [submodule "cron"]
 path = vendor/github.com/robfig/cron
-url = https://github.com/robfig/cron.git
+url = https://github.com/robfig/cron
 
 [submodule "cli"]
 path = vendor/github.com/codegangsta/cli
-  url = https://github.com/codegangsta/cli.git
+url = https://github.com/codegangsta/cli
