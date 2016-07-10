@@ -1,5 +1,8 @@
 language: go
-go: 1.5
+go:
+  - 1.5
+  - 1.6
+  - tip
 
 install:
   - export PATH=$PATH:$HOME/gopath/bin
