@@ -22,10 +22,6 @@ url = https://github.com/robfig/config
 path = vendor/github.com/robfig/pathtree
 url = https://github.com/robfig/pathtree
 
-[submodule "cron"]
-path = vendor/github.com/robfig/cron
-url = https://github.com/robfig/cron
-
 [submodule "cli"]
 path = vendor/github.com/codegangsta/cli
 url = https://github.com/codegangsta/cli

@@ -22,9 +22,6 @@ import:
 - package: github.com/robfig/pathtree
   version: 41257a1839e945fce74afd070e02bab2ea2c776a
   vcs: git
-- package: github.com/robfig/cron
-  version: 67823cd24dece1b04cced3a0a0b3ca2bc84d875e
-  vcs: git
 - package: github.com/codegangsta/cli
   version: v1.9.0
   vcs: git
