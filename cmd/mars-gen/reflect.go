@@ -558,7 +558,10 @@ func NewTypeExpr(pkgName string, expr ast.Expr) TypeExpr {
 	case *ast.StarExpr:
 		e := NewTypeExpr(pkgName, t.X)
 		return TypeExpr{"*" + e.Expr, e.PkgName, e.pkgIndex + 1, e.Valid}
+		return e
 	case *ast.ArrayType:
+		e := NewTypeExpr(pkgName, t.Elt)
+		return TypeExpr{"[]" + e.Expr, e.PkgName, e.pkgIndex + 2, e.Valid}
 	case *ast.Ellipsis:
 		e := NewTypeExpr(pkgName, t.Elt)
 		return TypeExpr{"[]" + e.Expr, e.PkgName, e.pkgIndex + 2, e.Valid}

@@ -25,7 +25,8 @@ var TypeExprs = map[string]TypeExpr{
 }
 
 func TestTypeExpr(t *testing.T) {
-	for typeStr, expected := range TypeExprs {
+	for str, expected := range TypeExprs {
+		typeStr := str
 		// Handle arrays and ... myself, since ParseExpr() does not.
 		array := strings.HasPrefix(typeStr, "[]")
 		if array {
@@ -52,7 +53,7 @@ func TestTypeExpr(t *testing.T) {
 
 		actual := NewTypeExpr("pkg", expr)
 		if !reflect.DeepEqual(expected, actual) {
-			t.Error("Fail, expected", expected, ", was", actual)
+			t.Errorf("Fail, expected '%v' for '%s', got '%v'\n", expected, str, actual)
 		}
 	}
 }
