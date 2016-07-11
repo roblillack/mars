@@ -1,15 +1,18 @@
 language: go
+
+sudo: false
+
 go:
   - 1.5
   - 1.6
   - tip
 
+before_install:
+   - go get github.com/mattn/goveralls
+   - go get golang.org/x/tools/cmd/cover
+
 install:
-  - export PATH=$PATH:$HOME/gopath/bin
-  - export MARS_BRANCH="master"
   - export GO15VENDOREXPERIMENT=1
-  - 'if [[ "$TRAVIS_BRANCH" == "master" ]]; then export MARS_BRANCH="master"; fi'
-  - 'echo "Travis branch: $TRAVIS_BRANCH, Mars dependency branch: $MARS_BRANCH"'
 
 script:
-  - go test github.com/roblillack/mars
+    - $HOME/gopath/bin/goveralls -service=travis-ci
