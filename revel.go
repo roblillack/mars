@@ -69,9 +69,6 @@ var (
 	CookieHttpOnly = false
 	CookieSecure   = false
 
-	// Delimiters to use when rendering templates
-	TemplateDelims = ""
-
 	//Logger colors
 	colors = map[string]gocolorize.Colorize{
 		"trace": gocolorize.NewColor("magenta"),
@@ -158,7 +155,6 @@ func InitDefaults(mode, basePath string) {
 	CookieDomain = Config.StringDefault("cookie.domain", CookieDomain)
 	CookieHttpOnly = Config.BoolDefault("cookie.httponly", CookieHttpOnly)
 	CookieSecure = Config.BoolDefault("cookie.secure", CookieSecure)
-	TemplateDelims = Config.StringDefault("template.delimiters", TemplateDelims)
 
 	if s := Config.StringDefault("app.secret", ""); s != "" {
 		SetAppSecret(s)

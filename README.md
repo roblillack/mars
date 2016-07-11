@@ -29,6 +29,7 @@ The major changes since forking away from Revel are these:
 - Removed magic that automatically added template parameter names based on variable names in `Controller.Render()` calls using code generation and runtime introspection.
 - Removed the cache library.
 - Removed module support.
+- Removed support for configurable template delimiters.
 - Corrected case of render functions (`RenderXml` --> `RenderXML`).
 - Fix generating reverse routes for some edge cases: Action parameter is called `args` or action parameter is of type `interface{}`.
 
