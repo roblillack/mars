@@ -19,6 +19,10 @@ var (
 	Server             *http.Server
 )
 
+// Handler is a http.HandlerFunc which exposes Mars' filtering, routing, and
+// interception functionality for you to use with custom HTTP servers.
+var Handler = http.HandlerFunc(handle)
+
 // This method handles all requests.  It dispatches to handleInternal after
 // handling / adapting websocket connections.
 func handle(w http.ResponseWriter, r *http.Request) {
@@ -84,24 +88,9 @@ func Run(port int) {
 
 	Server = &http.Server{
 		Addr:         localAddress,
-		Handler:      http.HandlerFunc(handle),
+		Handler:      Handler,
 		ReadTimeout:  time.Minute,
 		WriteTimeout: time.Minute,
-	}
-
-	runStartupHooks()
-
-	// The "watch" config variable can turn on and off all watching.
-	// (As a convenient way to control it all together.)
-	if Config.BoolDefault("watch", true) {
-		MainWatcher = NewWatcher()
-		Filters = append([]Filter{WatchFilter}, Filters...)
-	}
-
-	// If desired (or by default), create a watcher for templates and routes.
-	// The watcher calls Refresh() on things on the first request.
-	if MainWatcher != nil && Config.BoolDefault("watch.templates", true) && MainTemplateLoader != nil {
-		MainWatcher.Listen(MainTemplateLoader, MainTemplateLoader.paths...)
 	}
 
 	go func() {
@@ -124,52 +113,4 @@ func Run(port int) {
 		}
 		ERROR.Fatalln("Failed to serve:", Server.Serve(listener))
 	}
-}
-
-func runStartupHooks() {
-	for _, hook := range startupHooks {
-		hook()
-	}
-}
-
-var startupHooks []func()
-
-// Register a function to be run at app startup.
-//
-// The order you register the functions will be the order they are run.
-// You can think of it as a FIFO queue.
-// This process will happen after the config file is read
-// and before the server is listening for connections.
-//
-// Ideally, your application should have only one call to init() in the file init.go.
-// The reason being that the call order of multiple init() functions in
-// the same package is undefined.
-// Inside of init() call mars.OnAppStart() for each function you wish to register.
-//
-// Example:
-//
-//      // from: yourapp/app/controllers/somefile.go
-//      func InitDB() {
-//          // do DB connection stuff here
-//      }
-//
-//      func FillCache() {
-//          // fill a cache from DB
-//          // this depends on InitDB having been run
-//      }
-//
-//      // from: yourapp/app/init.go
-//      func init() {
-//          // set up filters...
-//
-//          // register startup functions
-//          mars.OnAppStart(InitDB)
-//          mars.OnAppStart(FillCache)
-//      }
-//
-// This can be useful when you need to establish connections to databases or third-party services,
-// setup app components, compile assets, or any thing you need to do between starting Mars and accepting connections.
-//
-func OnAppStart(f func()) {
-	startupHooks = append(startupHooks, f)
 }

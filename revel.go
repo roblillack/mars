@@ -171,25 +171,52 @@ func InitDefaults(mode, basePath string) {
 	WARN = getLogger("warn", WARN)
 	ERROR = getLogger("error", ERROR)
 
-	SetupViews()
-	SetupRouter()
+	// The "watch" config variable can turn on and off all watching.
+	// (As a convenient way to control it all together.)
+	if Config.BoolDefault("watch", true) {
+		MainWatcher = NewWatcher()
+		Filters = append([]Filter{WatchFilter}, Filters...)
+	}
+
+	if MainTemplateLoader == nil {
+		SetupViews()
+	}
+	if MainRouter == nil {
+		SetupRouter()
+	}
 
 	INFO.Printf("Initialized Mars v%s (%s) for %s", VERSION, BUILD_DATE, MINIMUM_GO)
+
+	runStartupHooks()
 }
 
 // SetupViews will create a template loader for all the templates provided in ViewsPath
 func SetupViews() {
 	MainTemplateLoader = NewTemplateLoader([]string{path.Join(BasePath, ViewsPath)})
-	MainTemplateLoader.Refresh()
+	if err := MainTemplateLoader.Refresh(); err != nil {
+		ERROR.Fatalln(err.Error())
+	}
+
+	// If desired (or by default), create a watcher for templates and routes.
+	// The watcher calls Refresh() on things on the first request.
+	if MainWatcher != nil && Config.BoolDefault("watch.templates", true) {
+		MainWatcher.Listen(MainTemplateLoader, MainTemplateLoader.paths...)
+	}
 }
 
 // SetupRouter will create the router of the application based on the information
 // provided in RoutesFile and the controllers and actions which have been registered
 // using RegisterController.
 func SetupRouter() {
-	MainRouter = NewRouter(path.Join(BasePath, RoutesFile))
+	MainRouter = NewRouter(filepath.Join(BasePath, RoutesFile))
 	if err := MainRouter.Refresh(); err != nil {
 		ERROR.Fatalln(err.Error())
+	}
+
+	// If desired (or by default), create a watcher for templates and routes.
+	// The watcher calls Refresh() on things on the first request.
+	if MainWatcher != nil && Config.BoolDefault("watch.routes", true) {
+		MainWatcher.Listen(MainRouter, MainRouter.path)
 	}
 }
 
