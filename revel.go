@@ -113,11 +113,13 @@ func InitDefaults(mode, basePath string) {
 
 	BasePath = filepath.FromSlash(basePath)
 
-	// Load app.conf
-	var err error
-	Config, err = LoadConfig(path.Join(BasePath, ConfigFile))
-	if err != nil || Config == nil {
-		log.Fatalln("Failed to load app.conf:", err)
+	cfgPath := filepath.Join(BasePath, ConfigFile)
+	if _, err := os.Stat(cfgPath); !os.IsNotExist(err) {
+		var err error
+		Config, err = LoadConfig(cfgPath)
+		if err != nil || Config == nil {
+			log.Fatalln("Failed to load app.conf:", err)
+		}
 	}
 
 	MimeConfig, _ = LoadConfig(path.Join(BasePath, MimeTypesFile))
@@ -127,10 +129,9 @@ func InitDefaults(mode, basePath string) {
 	if mode == "" {
 		mode = config.DEFAULT_SECTION
 	}
-	if !Config.HasSection(mode) {
-		log.Fatalln("app.conf: No mode found:", mode)
+	if Config.HasSection(mode) {
+		Config.SetSection(mode)
 	}
-	Config.SetSection(mode)
 
 	// Configure properties from app.conf
 	DevMode = Config.BoolDefault("mode.dev", DevMode)
