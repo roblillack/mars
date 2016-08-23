@@ -98,7 +98,7 @@ func generateRandomToken() string {
 //
 // See also:
 // https://tools.ietf.org/html/rfc7231#section-4.2.1
-var CSRFFilter = func(c *Controller, fc []Filter) {
+func CSRFFilter(c *Controller, fc []Filter) {
 	if DisableCSRF {
 		fc[0](c, fc[1:])
 		return
