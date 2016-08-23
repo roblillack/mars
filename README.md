@@ -17,6 +17,7 @@ Hah. Sorry, nothing here, yet. But if you want to switch a Revel project to Mars
 ## Differences to Revel
 
 The major changes since forking away from Revel are these:
+
 - More idiomatic approach to integrating the framework into your application:
     + No need to use the `revel` command to build, run, package, or distribute your app.
     + Code generation (for registering controllers and reverse routes) is supported using the standard `go generate` way.
@@ -32,6 +33,7 @@ The major changes since forking away from Revel are these:
 - Removed support for configurable template delimiters.
 - Corrected case of render functions (`RenderXml` --> `RenderXML`).
 - Fix generating reverse routes for some edge cases: Action parameter is called `args` or action parameter is of type `interface{}`.
+- Added [CSRF protection](https://godoc.org/github.com/roblillack/mars#CSRFFilter) functionality.
 
 ## Moving from Revel to Mars in 7 steps
 1. Add the dependency:
@@ -79,6 +81,11 @@ The major changes since forking away from Revel are these:
        mars.ViewsPath = path.Join("app", "views")
        mars.ConfigFile = path.Join("app", "conf", "app.conf")
        mars.RoutesFile = path.Join("app", "conf", "routes")
+
+       // Ok, we should never, ever, ever disable CSRF protection.
+       // But to stay compatible with Revel's defaults ....
+       // Read https://godoc.org/github.com/roblillack/mars#CSRFFilter about what to do to enable this again.
+       mars.DisableCSRF = true
 
        // Reads the config, sets up template loader, creates router
        mars.InitDefaults(mode, ".")
