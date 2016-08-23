@@ -69,6 +69,9 @@ var (
 	CookieHttpOnly = false
 	CookieSecure   = false
 
+	// DisableCSRF disables CSRF checking altogether. See CSRFFilter for more information.
+	DisableCSRF = false
+
 	//Logger colors
 	colors = map[string]gocolorize.Colorize{
 		"trace": gocolorize.NewColor("magenta"),

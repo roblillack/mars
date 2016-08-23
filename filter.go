@@ -15,6 +15,7 @@ var Filters = []Filter{
 	I18nFilter,              // Resolve the requested language.
 	InterceptorFilter,       // Run interceptors around the action.
 	CompressFilter,          // Compress the result.
+	CSRFFilter,              // Protect against Cross-site request forgery
 	ActionInvoker,           // Invoke the action.
 }
 

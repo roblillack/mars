@@ -35,6 +35,11 @@ type Controller struct {
 	Args       Args        // Per-request scratch space.
 	RenderArgs Args        // Args passed to the template.
 	Validation *Validation // Data validation helpers
+
+	// SkipCSRF can be set by Interceptors to disable the CSRF checking
+	// based on the request before the actions get called. Use this flag to
+	// allow for API calls that do not use cookie-based authentication.
+	SkipCSRF bool
 }
 
 // NewController creates a new controller based on the given Request and
