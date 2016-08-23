@@ -46,6 +46,11 @@
            mars.ConfigFile = path.Join("app", "conf", "app.conf")
            mars.RoutesFile = path.Join("app", "conf", "routes")
 
+           // Ok, we should never, ever, ever disable CSRF protection.
+           // But to stay compatible with Revel's defaults ....
+           // Read https://godoc.org/github.com/roblillack/mars#CSRFFilter about what to do to enable this again.
+           mars.DisableCSRF = true
+
            // Reads the config, sets up template loader, creates router
            mars.InitDefaults(mode, ".")
 
