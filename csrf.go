@@ -29,12 +29,12 @@ func isSafeMethod(c *Controller) bool {
 
 func findCSRFToken(c *Controller) string {
 	if h := c.Request.Header.Get(csrfHeaderName); h != "" {
-		INFO.Printf("Have header CSRF token: %s\n", h)
+		TRACE.Printf("Have header CSRF token: %s\n", h)
 		return h
 	}
 
 	if f := c.Params.Get(csrfFieldName); f != "" {
-		INFO.Printf("Have form field CSRF token: %s\n", f)
+		TRACE.Printf("Have form field CSRF token: %s\n", f)
 		return f
 	}
 
@@ -125,8 +125,7 @@ func CSRFFilter(c *Controller, fc []Filter) {
 	c.RenderArgs["csrfToken"] = csrfToken
 	c.RenderArgs["csrfField"] = template.HTML(`<input type='hidden' name='` + csrfFieldName + `' value='` + csrfToken + `'/>`)
 
-	ignore, haveIgnore := c.Args["ignore_csrf"].(bool)
-	if !isSafeMethod(c) && !(haveIgnore && ignore) {
+	if !isSafeMethod(c) && !c.SkipCSRF {
 		token := findCSRFToken(c)
 		if token == "" || token != csrfToken {
 			c.Result = c.Forbidden("No/wrong CSRF token given.")
