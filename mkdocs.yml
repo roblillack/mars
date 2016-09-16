@@ -4,5 +4,6 @@ pages:
 - Getting Started: getting-started.md
 - Migrating from Revel: migration.md
 - Code generation: code-generation.md
+- Testing: testing.md
 - F.A.Q.: faq.md
 theme: readthedocs
