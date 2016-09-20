@@ -122,12 +122,12 @@ var (
 			return template.HTML(ERROR_CLASS)
 		},
 
-		"msg": func(renderArgs map[string]interface{}, message string, args ...interface{}) template.HTML {
+		"msg": func(renderArgs map[string]interface{}, message string, args ...interface{}) string {
 			str, ok := renderArgs[CurrentLocaleRenderArg].(string)
 			if !ok {
 				return ""
 			}
-			return template.HTML(Message(str, message, args...))
+			return Message(str, message, args...)
 		},
 
 		// Replaces newlines with <br>
