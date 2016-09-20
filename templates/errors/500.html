@@ -7,9 +7,10 @@
 		{{if .DevMode}}
 		{{template "errors/500-dev.html" .}}
 		{{else}}
-		<h1>Oops, an error occured</h1>
+		<h1>Oops, an error occured.</h1>
+		<h2>{{.Error.Title}}</h2>
 		<p>
-			This exception has been logged.
+			{{.Error.Description}}
 		</p>
 		{{end}}
 	</body>
