@@ -122,12 +122,12 @@ var (
 			return template.HTML(ERROR_CLASS)
 		},
 
-		"msg": func(renderArgs map[string]interface{}, message string, args ...interface{}) string {
+		"msg": func(renderArgs map[string]interface{}, message string, args ...interface{}) template.HTML {
 			str, ok := renderArgs[CurrentLocaleRenderArg].(string)
 			if !ok {
-				return ""
+				return template.HTML(``)
 			}
-			return Message(str, message, args...)
+			return MessageHTML(str, message, args...)
 		},
 
 		// Dummy function to tell the allow for signature checking when compiling the templates
@@ -462,12 +462,7 @@ func (gotmpl GoTemplate) Render(wr io.Writer, arg interface{}) error {
 		return gotmpl.Execute(wr, arg)
 	}
 
-	tpl, err := gotmpl.Template.Clone()
-	if err != nil {
-		return err
-	}
-	tpl = tpl.Funcs(gotmpl.funcMap)
-	return tpl.Execute(wr, arg)
+	return gotmpl.Funcs(gotmpl.funcMap).Execute(wr, arg)
 }
 
 func (gotmpl GoTemplate) Content() []string {

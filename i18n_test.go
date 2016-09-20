@@ -1,9 +1,14 @@
 package mars
 
 import (
+	"bytes"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httptest"
+	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 )
@@ -214,4 +219,54 @@ func buildEmptyRequest() *Request {
 	httpRequest, _ := http.NewRequest("GET", "/", nil)
 	request := NewRequest(httpRequest)
 	return request
+}
+
+func runRequest(locale, view string, args Args) string {
+	w := httptest.NewRecorder()
+	c := NewController(buildEmptyRequest(), &Response{Out: w})
+	for k, v := range args {
+		c.RenderArgs[k] = v
+	}
+	c.RenderArgs[CurrentLocaleRenderArg] = locale
+	c.RenderTemplate(view).Apply(c.Request, c.Response)
+
+	buf := &bytes.Buffer{}
+	buf.ReadFrom(w.Body)
+	return buf.String()
+}
+
+type blurp struct{ s string }
+type blarp struct{ s string }
+
+func Blurp(input string) blurp {
+	return blurp{input}
+}
+
+func Blarp(input string) blarp {
+	return blarp{input}
+}
+
+func (b blarp) String() string {
+	return b.s
+}
+
+func TestSafeHTML(t *testing.T) {
+	loadMessages(testDataPath)
+
+	_, filename, _, _ := runtime.Caller(0)
+	BasePath = filepath.Join(filepath.Dir(filename), "testdata")
+	SetupViews()
+
+	for expected, input := range map[string]interface{}{
+		"<h1>Hey, there <b>Rob</b>!</h1>":                                  "Rob",
+		"<h1>Hey, there <b>&lt;img src=a onerror=alert(1) /&gt;</b>!</h1>": "<img src=a onerror=alert(1) />",
+		"<h1>Hey, there <b><img src=a onerror=alert(1) /></b>!</h1>":       template.HTML("<img src=a onerror=alert(1) />"),
+		"<h1>Hey, there <b>{&lt;3}</b>!</h1>":                              Blurp("<3"),
+		"<h1>Hey, there <b>&lt;3</b>!</h1>":                                Blarp("<3"),
+	} {
+		result := runRequest("en", "i18n.html", Args{"input": input})
+		if result != expected {
+			t.Errorf("Expected '%s', got '%s' for input '%s'", expected, result, input)
+		}
+	}
 }

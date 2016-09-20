@@ -2,11 +2,14 @@ package mars
 
 import (
 	"fmt"
-	"github.com/robfig/config"
+	"html"
+	"html/template"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/robfig/config"
 )
 
 const (
@@ -73,6 +76,64 @@ func Message(locale, message string, args ...interface{}) string {
 	}
 
 	return value
+}
+
+// MessageHTML performs a message look-up for the given locale and message using the given arguments
+// and guarantees, that safe HTML is always returned.
+func MessageHTML(locale, key string, args ...interface{}) template.HTML {
+	if !strings.HasSuffix(key, ".html") && !strings.HasSuffix(key, "_html") {
+		return template.HTML(html.EscapeString(Message(locale, key, args...)))
+	}
+
+	safeArgs := make([]interface{}, len(args))
+	for idx, arg := range args {
+		switch val := arg.(type) {
+		case template.HTML:
+			safeArgs[idx] = val
+		case string:
+			safeArgs[idx] = html.EscapeString(val)
+		case fmt.Stringer:
+			safeArgs[idx] = html.EscapeString(val.String())
+		case []byte:
+			safeArgs[idx] = []byte(html.EscapeString(string(val)))
+		case bool:
+			safeArgs[idx] = val
+		case float32:
+			safeArgs[idx] = val
+		case float64:
+			safeArgs[idx] = val
+		case complex64:
+			safeArgs[idx] = val
+		case complex128:
+			safeArgs[idx] = val
+		case int:
+			safeArgs[idx] = val
+		case int8:
+			safeArgs[idx] = val
+		case int16:
+			safeArgs[idx] = val
+		case int32:
+			safeArgs[idx] = val
+		case int64:
+			safeArgs[idx] = val
+		case uint:
+			safeArgs[idx] = val
+		case uint8:
+			safeArgs[idx] = val
+		case uint16:
+			safeArgs[idx] = val
+		case uint32:
+			safeArgs[idx] = val
+		case uint64:
+			safeArgs[idx] = val
+		case uintptr:
+			safeArgs[idx] = val
+		default:
+			safeArgs[idx] = html.EscapeString(fmt.Sprint(val))
+		}
+	}
+
+	return template.HTML(Message(locale, key, safeArgs...))
 }
 
 func parseLocale(locale string) (language, region string) {
