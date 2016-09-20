@@ -130,6 +130,9 @@ var (
 			return Message(str, message, args...)
 		},
 
+		// Dummy function to tell the allow for signature checking when compiling the templates
+		"t": func(message string, args ...interface{}) template.HTML { return template.HTML(``) },
+
 		// Replaces newlines with <br>
 		"nl2br": func(text string) template.HTML {
 			return template.HTML(strings.Replace(template.HTMLEscapeString(text), "\n", "<br>", -1))
@@ -405,7 +408,7 @@ func parseTemplateError(err error) (templateName string, line int, description s
 //
 // An Error is returned if there was any problem with any of the templates.  (In
 // this case, if a template is returned, it may still be usable.)
-func (loader *TemplateLoader) Template(name string) (Template, error) {
+func (loader *TemplateLoader) Template(name string, funcMaps ...Args) (Template, error) {
 	// Case-insensitive matching of template file name
 	templateName := loader.templateNames[strings.ToLower(name)]
 
@@ -433,18 +436,38 @@ func (loader *TemplateLoader) Template(name string) (Template, error) {
 		return nil, fmt.Errorf("Template %s not found.", name)
 	}
 
-	return GoTemplate{tmpl, loader}, err
+	var funcMap template.FuncMap
+	for _, i := range funcMaps {
+		if funcMap == nil {
+			funcMap = template.FuncMap{}
+		}
+		for k, v := range i {
+			funcMap[k] = v
+		}
+	}
+
+	return GoTemplate{tmpl, loader, funcMap}, err
 }
 
 // Adapter for Go Templates.
 type GoTemplate struct {
 	*template.Template
-	loader *TemplateLoader
+	loader  *TemplateLoader
+	funcMap template.FuncMap
 }
 
 // return a 'mars.Template' from Go's template.
 func (gotmpl GoTemplate) Render(wr io.Writer, arg interface{}) error {
-	return gotmpl.Execute(wr, arg)
+	if gotmpl.funcMap == nil {
+		return gotmpl.Execute(wr, arg)
+	}
+
+	tpl, err := gotmpl.Template.Clone()
+	if err != nil {
+		return err
+	}
+	tpl = tpl.Funcs(gotmpl.funcMap)
+	return tpl.Execute(wr, arg)
 }
 
 func (gotmpl GoTemplate) Content() []string {

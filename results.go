@@ -119,7 +119,7 @@ func (r PlaintextErrorResult) Apply(req *Request, resp *Response) {
 // Action methods return this result to request a template be rendered.
 type RenderTemplateResult struct {
 	Template   Template
-	RenderArgs map[string]interface{}
+	RenderArgs Args
 }
 
 func (r *RenderTemplateResult) Apply(req *Request, resp *Response) {

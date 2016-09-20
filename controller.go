@@ -3,6 +3,8 @@ package mars
 import (
 	"errors"
 	"fmt"
+	"html"
+	"html/template"
 	"io"
 	"net/http"
 	"os"
@@ -104,7 +106,10 @@ func (c *Controller) Render(extraRenderArgs ...Args) Result {
 // given template, using the current RenderArgs.
 func (c *Controller) RenderTemplate(templatePath string) Result {
 	// Get the Template.
-	template, err := MainTemplateLoader.Template(templatePath)
+	template, err := MainTemplateLoader.Template(templatePath, Args{
+		// fill in context-specific render functions
+		"t": c.translate,
+	})
 	if err != nil {
 		return c.RenderError(err)
 	}
@@ -251,6 +256,34 @@ func (c *Controller) Redirect(val interface{}, args ...interface{}) Result {
 // The current language is set by the i18n plugin.
 func (c *Controller) Message(message string, args ...interface{}) (value string) {
 	return Message(c.Request.Locale, message, args...)
+}
+
+// translate performs a message lookup for the given translation key given the
+// arguments using the current language much in the same way Message does. translateHTML
+// will additionally check if the translation key is configured to contain safe HTML
+// in which case the arguments are safely interpolated.
+func (c *Controller) translate(key string, args ...interface{}) template.HTML {
+	if !strings.HasSuffix(key, ".html") && !strings.HasSuffix(key, "_html") {
+		return template.HTML(html.EscapeString(c.Message(key, args...)))
+	}
+
+	safeArgs := make([]interface{}, len(args))
+	for idx, arg := range args {
+		switch val := arg.(type) {
+		case template.HTML:
+			safeArgs[idx] = val
+		case string:
+			safeArgs[idx] = html.EscapeString(val)
+		case fmt.Stringer:
+			safeArgs[idx] = html.EscapeString(val.String())
+		case []byte:
+			safeArgs[idx] = []byte(html.EscapeString(string(val)))
+		default:
+			safeArgs[idx] = arg
+		}
+	}
+
+	return template.HTML(c.Message(key, safeArgs...))
 }
 
 // SetAction sets the action that is being invoked in the current request.
