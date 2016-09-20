@@ -254,11 +254,19 @@ func (c *Controller) Redirect(val interface{}, args ...interface{}) Result {
 //
 // The current language is set by the i18n plugin.
 func (c *Controller) Message(message string, args ...interface{}) (value string) {
-	return Message(c.Request.Locale, message, args...)
+	locale := c.Request.Locale
+	if l, ok := c.RenderArgs[CurrentLocaleRenderArg].(string); ok {
+		locale = l
+	}
+	return Message(locale, message, args...)
 }
 
 func (c *Controller) MessageHTML(message string, args ...interface{}) template.HTML {
-	return MessageHTML(c.Request.Locale, message, args...)
+	locale := c.Request.Locale
+	if l, ok := c.RenderArgs[CurrentLocaleRenderArg].(string); ok {
+		locale = l
+	}
+	return MessageHTML(locale, message, args...)
 }
 
 // SetAction sets the action that is being invoked in the current request.
