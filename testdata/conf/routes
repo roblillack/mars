@@ -5,6 +5,7 @@
 GET     /hotels                                 Hotels.Index
 GET     /hotels/:id                             Hotels.Show
 GET     /hotels/:id/booking                     Hotels.Book
+GET     /boom                                   Hotels.Boom
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/*filepath                       Static.Serve("public")

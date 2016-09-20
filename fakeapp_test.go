@@ -39,6 +39,11 @@ func (c Hotels) Index() Result {
 	return c.RenderText("Hello, World!")
 }
 
+func (c Hotels) Boom() Result {
+	panic("OMG")
+	return nil
+}
+
 func (c MyStatic) Serve(prefix, filepath string) Result {
 	var basePath, dirName string
 
@@ -62,6 +67,9 @@ func startFakeBookingApp() {
 		[]*MethodType{
 			&MethodType{
 				Name: "Index",
+			},
+			&MethodType{
+				Name: "Boom",
 			},
 			&MethodType{
 				Name: "Show",
