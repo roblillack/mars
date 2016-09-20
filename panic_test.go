@@ -69,7 +69,7 @@ func TestPanicInDevMode(t *testing.T) {
 
 	if !containsAll(resp,
 		"github.com/roblillack/mars/fakeapp_test.go",
-		"github.com/roblillack/mars.Hotels.Boom",
+		"Hotels.Boom",
 		"OMG") {
 		t.Error("Unable to get full panic info, got:\n", string(resp))
 	}
