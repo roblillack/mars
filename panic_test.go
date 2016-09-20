@@ -71,6 +71,6 @@ func TestPanicInDevMode(t *testing.T) {
 		"github.com/roblillack/mars/fakeapp_test.go",
 		"github.com/roblillack/mars.Hotels.Boom",
 		"OMG") {
-		t.Error("Unable to get full panic info, got:\n", resp)
+		t.Error("Unable to get full panic info, got:\n", string(resp))
 	}
 }
