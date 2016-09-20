@@ -34,6 +34,7 @@ The major changes since forking away from Revel are these:
 - Corrected case of render functions (`RenderXml` --> `RenderXML`).
 - Fix generating reverse routes for some edge cases: Action parameter is called `args` or action parameter is of type `interface{}`.
 - Added [CSRF protection](https://godoc.org/github.com/roblillack/mars#CSRFFilter) functionality.
+- Fixed a [XSS vulnerability](https://github.com/roblillack/mars/issues/1).
 
 ## Moving from Revel to Mars in 7 steps
 1. Add the dependency:
