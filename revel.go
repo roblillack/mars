@@ -116,7 +116,13 @@ func InitDefaults(mode, basePath string) {
 
 	BasePath = filepath.FromSlash(basePath)
 
-	cfgPath := filepath.Join(BasePath, ConfigFile)
+	var cfgPath string
+	if filepath.IsAbs(ConfigFile) {
+		cfgPath = ConfigFile
+	} else {
+		cfgPath = filepath.Join(BasePath, ConfigFile)
+	}
+
 	if _, err := os.Stat(cfgPath); !os.IsNotExist(err) {
 		var err error
 		Config, err = LoadConfig(cfgPath)
