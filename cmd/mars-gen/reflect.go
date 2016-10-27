@@ -149,7 +149,7 @@ func processPackage(fset *token.FileSet, pkgImportPath, pkgPath string, pkg *ast
 	)
 
 	// For each source file in the package...
-	for _, file := range pkg.Files {
+	for _, file := range getSortedFiles(pkg) {
 
 		// Imports maps the package key to the full import path.
 		// e.g. import "sample/app/models" => "models": "sample/app/models"
