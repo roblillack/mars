@@ -1,6 +1,7 @@
 package mars
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -55,11 +56,16 @@ var (
 	// the current process reality.  For example, if the app is configured for
 	// port 9000, HttpPort will always be 9000, even though in dev mode it is
 	// run on a random port and proxied.
-	HttpPort    = 9000
-	HttpAddr    = ""    // e.g. "", "127.0.0.1"
-	HttpSsl     = false // e.g. true if using ssl
-	HttpSslCert = ""    // e.g. "/path/to/cert.pem"
-	HttpSslKey  = ""    // e.g. "/path/to/key.pem"
+	HttpAddr    = ":9000" // e.g. "", "127.0.0.1"
+	HttpSsl     = false   // e.g. true if using ssl
+	HttpSslCert = ""      // e.g. "/path/to/cert.pem"
+	HttpSslKey  = ""      // e.g. "/path/to/key.pem"
+
+	DualStackHTTP          = false
+	SSLAddr                = ":https"
+	SelfSignedCert         = false
+	SelfSignedOrganization = "ACME Inc."
+	SelfSignedDomains      = "127.0.0.1"
 
 	// All cookies dropped by the framework begin with this prefix.
 	CookiePrefix = "MARS"
@@ -144,18 +150,42 @@ func InitDefaults(mode, basePath string) {
 
 	// Configure properties from app.conf
 	DevMode = Config.BoolDefault("mode.dev", DevMode)
-	HttpPort = Config.IntDefault("http.port", HttpPort)
 	HttpAddr = Config.StringDefault("http.addr", HttpAddr)
-	HttpSsl = Config.BoolDefault("http.ssl", HttpSsl)
-	HttpSslCert = Config.StringDefault("http.sslcert", HttpSslCert)
-	HttpSslKey = Config.StringDefault("http.sslkey", HttpSslKey)
+	HttpSsl = Config.BoolDefault("https.enabled", Config.BoolDefault("http.ssl", HttpSsl))
+	HttpSslCert = Config.StringDefault("https.certfile", Config.StringDefault("http.sslcert", HttpSslCert))
+	HttpSslKey = Config.StringDefault("https.keyfile", Config.StringDefault("http.sslkey", HttpSslKey))
 
-	if HttpSsl {
+	DualStackHTTP = Config.BoolDefault("http.dualstack", DualStackHTTP)
+	SSLAddr = Config.StringDefault("https.addr", "")
+	SelfSignedCert = Config.BoolDefault("https.selfsign", SelfSignedCert)
+	SelfSignedOrganization = Config.StringDefault("https.organization", SelfSignedOrganization)
+	SelfSignedDomains = Config.StringDefault("https.domains", SelfSignedDomains)
+
+	if (DualStackHTTP || HttpSsl) && !SelfSignedCert {
 		if HttpSslCert == "" {
-			log.Fatalln("No http.sslcert provided.")
+			log.Fatalln("No https.certfile provided and https.selfsign not true.")
 		}
 		if HttpSslKey == "" {
-			log.Fatalln("No http.sslkey provided.")
+			log.Fatalln("No https.keyfile provided and https.selfsign not true.")
+		}
+	}
+
+	tryAddingSSLPort := false
+	// Support legacy way of specifying HTTPS addr
+	if SSLAddr == "" {
+		if HttpSsl && !DualStackHTTP {
+			SSLAddr = HttpAddr
+			tryAddingSSLPort = true
+		} else {
+			SSLAddr = ":https"
+		}
+	}
+
+	// Support legacy way of specifying port number as config setting http.port
+	if p := Config.IntDefault("http.port", -1); p != -1 {
+		HttpAddr = fmt.Sprintf("%s:%d", HttpAddr, p)
+		if tryAddingSSLPort {
+			SSLAddr = fmt.Sprintf("%s:%d", SSLAddr, p)
 		}
 	}
 

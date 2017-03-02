@@ -71,7 +71,6 @@ The major changes since forking away from Revel are these:
    )
 
    func main() {
-       port := flag.Int("p", -1, "Port to listen on (default: use mars config)")
        mode := flag.String("m", "prod", "Runtime mode to select (default: prod)")
        flag.Parse()
 
@@ -91,11 +90,7 @@ The major changes since forking away from Revel are these:
        // Reads the config, sets up template loader, creates router
        mars.InitDefaults(mode, ".")
 
-       if *port == -1 {
-           *port = mars.HttpPort
-       }
-
-       mars.Run(*port)
+       mars.Run()
    }
    ```
 7. Run `go generate && go build && ./myapp` and be happy.
