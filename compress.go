@@ -25,6 +25,7 @@ var compressableMimes = [...]string{
 	"application/rss+xml",
 	"application/javascript",
 	"application/x-javascript",
+	"image/svg+xml",
 }
 
 type WriteFlusher interface {
