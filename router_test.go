@@ -334,6 +334,46 @@ var reverseRoutingTestCases = map[*ReverseRouteArgs]*ActionDefinition{
 		Star:   false,
 		Action: "Application.WildShow",
 	},
+
+	&ReverseRouteArgs{
+		action: "Application.WildShow",
+		args:   map[string]string{"id": "100% organic"},
+	}: &ActionDefinition{
+		Url:    "/app-wild/100%25%20organic/",
+		Method: "GET",
+		Star:   false,
+		Action: "Application.WildShow",
+	},
+
+	&ReverseRouteArgs{
+		action: "Application.Show",
+		args:   map[string]string{"id": "100% organic"},
+	}: &ActionDefinition{
+		Url:    "/app/100%25%20organic/",
+		Method: "GET",
+		Star:   false,
+		Action: "Application.Show",
+	},
+
+	&ReverseRouteArgs{
+		action: "Application.WildShow",
+		args:   map[string]string{"id": "folder/subfolder"},
+	}: &ActionDefinition{
+		Url:    "/app-wild/folder/subfolder/",
+		Method: "GET",
+		Star:   false,
+		Action: "Application.WildShow",
+	},
+
+	&ReverseRouteArgs{
+		action: "Application.Show",
+		args:   map[string]string{"id": "folder/subfolder"},
+	}: &ActionDefinition{
+		Url:    "/app/folder%2Fsubfolder/",
+		Method: "GET",
+		Star:   false,
+		Action: "Application.Show",
+	},
 }
 
 func TestReverseRouting(t *testing.T) {
