@@ -301,6 +301,50 @@ func (a *ActionDefinition) String() string {
 	return a.Url
 }
 
+func shouldEscape(c byte) bool {
+	if 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z' || '0' <= c && c <= '9' {
+		return false
+	}
+
+	switch c {
+	case '-', '_', '.', '~', '$', '&', '+', ':', '=', '@':
+		return false
+	}
+
+	return true
+}
+
+func encodePathSegment(s string) string {
+	// From Go 1.8+: return url.PathEscape(segment)
+	spaceCount, hexCount := 0, 0
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if shouldEscape(c) {
+			hexCount++
+		}
+	}
+
+	if spaceCount == 0 && hexCount == 0 {
+		return s
+	}
+
+	t := make([]byte, len(s)+2*hexCount)
+	j := 0
+	for i := 0; i < len(s); i++ {
+		switch c := s[i]; {
+		case shouldEscape(c):
+			t[j] = '%'
+			t[j+1] = "0123456789ABCDEF"[c>>4]
+			t[j+2] = "0123456789ABCDEF"[c&15]
+			j += 3
+		default:
+			t[j] = s[i]
+			j++
+		}
+	}
+	return string(t)
+}
+
 func (router *Router) Reverse(action string, argValues map[string]string) *ActionDefinition {
 	actionSplit := strings.Split(action, ".")
 	if len(actionSplit) != 2 {
@@ -347,7 +391,7 @@ func (router *Router) Reverse(action string, argValues map[string]string) *Actio
 			if el[0] == '*' {
 				pathElements[i] = (&url.URL{Path: val}).RequestURI()
 			} else {
-				pathElements[i] = url.PathEscape(val)
+				pathElements[i] = encodePathSegment(val)
 			}
 			delete(argValues, el[1:])
 			continue
