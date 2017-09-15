@@ -6,7 +6,14 @@ func runStartupHooks() {
 	}
 }
 
+func runShutdownHooks() {
+	for _, hook := range shutdownHooks {
+		hook()
+	}
+}
+
 var startupHooks []func()
+var shutdownHooks []func()
 
 // Register a function to be run at app startup.
 //
@@ -46,4 +53,20 @@ var startupHooks []func()
 //
 func OnAppStart(f func()) {
 	startupHooks = append(startupHooks, f)
+}
+
+// OnAppShutdown register a function to be run at app shutdown.
+//
+// The order you register the functions will be the order they are run.
+// You can think of it as a FIFO queue.
+// This process will happen after the HTTP servers have stopped listening.
+//
+// Ideally, your application should have only one call to init() in the file init.go.
+// The reason being that the call order of multiple init() functions in
+// the same package is undefined.
+// Inside of init() call mars.OnAppShutdown() for each function you wish to register.
+//
+// See also OnAppStart
+func OnAppShutdown(f func()) {
+	shutdownHooks = append(shutdownHooks, f)
 }
