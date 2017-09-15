@@ -24,10 +24,12 @@ The major changes since forking away from Revel are these:
     + No runtime dependencies anymore. Apps using Mars are truly standalone and do not need access to the sources at runtime (default templates and mime config are embedded assets).
     + You are not forced into a fixed directory layout or package names anymore.
     + Removed most of the "path magic" that tried to determine where the sources of your application and revel are: No global `AppPath`, `ViewsPath`, `TemplatePaths`, `RevelPath`, and `SourcePath` variables anymore.
-- Added support for Go 1.5 vendor experiment.
+- Added support for Go 1.5+ vendoring.
 - Vendor Mars' dependencies as Git submodules.
 - Added support for [HTTP dual-stack mode](https://github.com/roblillack/mars/issues/6).
 - Added support for [generating self-signed SSL certificates on-the-fly](https://github.com/roblillack/mars/issues/6).
+- Added [graceful shutdown](https://godoc.org/github.com/roblillack/mars#OnAppShutdown) functionality.
+- Added [CSRF protection](https://godoc.org/github.com/roblillack/mars#CSRFFilter).
 - Integrated `Static` controller to support hosting plain HTML files and assets.
 - Removed magic that automatically added template parameter names based on variable names in `Controller.Render()` calls using code generation and runtime introspection.
 - Removed the cache library.
@@ -35,7 +37,6 @@ The major changes since forking away from Revel are these:
 - Removed support for configurable template delimiters.
 - Corrected case of render functions (`RenderXml` --> `RenderXML`).
 - Fix generating reverse routes for some edge cases: Action parameter is called `args` or action parameter is of type `interface{}`.
-- Added [CSRF protection](https://godoc.org/github.com/roblillack/mars#CSRFFilter) functionality.
 - Fixed a [XSS vulnerability](https://github.com/roblillack/mars/issues/1).
 
 ## Moving from Revel to Mars in 7 steps
