@@ -24,6 +24,6 @@ func TestCustomMimeTypes(t *testing.T) {
 	startFakeBookingApp()
 
 	if ct := ContentTypeByFilename("B1F1AA4C-8156-4649-9248-0DE19BD63164.bkng"); ct != "application/x-booking" {
-		t.Errorf("Wrong MIME type returned: %s", t)
+		t.Errorf("Wrong MIME type returned: %s", ct)
 	}
 }
