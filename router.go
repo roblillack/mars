@@ -42,6 +42,7 @@ type arg struct {
 
 // Prepares the route to be used in matching.
 func NewRoute(method, path, action, fixedArgs, routesPath string, line int) (r *Route) {
+
 	// Handle fixed arguments
 	argsReader := strings.NewReader(fixedArgs)
 	csv := csv.NewReader(argsReader)
@@ -378,9 +379,15 @@ func (router *Router) Reverse(action string, argValues map[string]string) *Actio
 			queryValues  = make(url.Values)
 			pathElements = strings.Split(route.Path, "/")
 		)
+		extension := ""
 		for i, el := range pathElements {
 			if el == "" || (el[0] != ':' && el[0] != '*') {
 				continue
+			}
+
+			if dotIdx := strings.IndexRune(el[1:], '.'); dotIdx > 0 {
+				extension = el[1+dotIdx:]
+				el = el[0 : dotIdx+1]
 			}
 
 			val, ok := argValues[el[1:]]
@@ -389,9 +396,9 @@ func (router *Router) Reverse(action string, argValues map[string]string) *Actio
 				ERROR.Print("mars/router: reverse route missing route arg ", el[1:])
 			}
 			if el[0] == '*' {
-				pathElements[i] = (&url.URL{Path: val}).RequestURI()
+				pathElements[i] = (&url.URL{Path: val}).RequestURI() + extension
 			} else {
-				pathElements[i] = encodePathSegment(val)
+				pathElements[i] = encodePathSegment(val) + extension
 			}
 			delete(argValues, el[1:])
 			continue

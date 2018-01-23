@@ -114,6 +114,7 @@ const TEST_ROUTES = `
 GET   /                          Application.Index
 GET   /test/                     Application.Index("Test", "Test2")
 GET   /app/:id/                  Application.Show
+GET   /app/:id.png               Application.ShowImage
 GET   /app-wild/*id/             Application.WildShow
 POST  /app/:id                   Application.Save
 PATCH /app/:id/                  Application.Update
@@ -293,6 +294,16 @@ var reverseRoutingTestCases = map[*ReverseRouteArgs]*ActionDefinition{
 		Method: "GET",
 		Star:   false,
 		Action: "Application.Index",
+	},
+
+	&ReverseRouteArgs{
+		action: "Application.ShowImage",
+		args:   map[string]string{"id": "123"},
+	}: &ActionDefinition{
+		Url:    "/app/123.png",
+		Method: "GET",
+		Star:   false,
+		Action: "Application.ShowImage",
 	},
 
 	&ReverseRouteArgs{
