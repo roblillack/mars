@@ -224,8 +224,6 @@ func InitDefaults(mode, basePath string) {
 		SetupRouter()
 	}
 
-	INFO.Printf("Initialized Mars v%s (%s) for %s", VERSION, BUILD_DATE, MINIMUM_GO)
-
 	runStartupHooks()
 }
 
