@@ -98,6 +98,10 @@ func (router *Router) Route(req *http.Request) *RouteMatch {
 		req.Method = method
 	}
 
+	if router == nil {
+		return nil
+	}
+
 	leaf, expansions := router.Tree.Find(treePath(req.Method, req.URL.Path))
 	if leaf == nil {
 		return nil

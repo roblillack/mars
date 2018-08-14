@@ -254,6 +254,19 @@ var routeMatchTestCases = map[*http.Request]*RouteMatch{
 	},
 }
 
+func TestEmptyRouter(t *testing.T) {
+	var router *Router
+
+	route := router.Route(&http.Request{
+		Method: "GET",
+		URL:    &url.URL{Path: "/"},
+	})
+
+	if route != nil {
+		t.Error("empty route expected")
+	}
+}
+
 func TestRouteMatches(t *testing.T) {
 	BasePath = "/BasePath"
 	router := NewRouter("")
