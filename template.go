@@ -3,6 +3,7 @@ package mars
 //go:generate go-bindata -pkg $GOPACKAGE -prefix templates -o embedded_templates.go templates/errors/
 
 import (
+	"errors"
 	"fmt"
 	"html"
 	"html/template"
@@ -409,6 +410,10 @@ func parseTemplateError(err error) (templateName string, line int, description s
 // An Error is returned if there was any problem with any of the templates.  (In
 // this case, if a template is returned, it may still be usable.)
 func (loader *TemplateLoader) Template(name string, funcMaps ...Args) (Template, error) {
+	if loader == nil {
+		return nil, errors.New("no template loader")
+	}
+
 	// Case-insensitive matching of template file name
 	templateName := loader.templateNames[strings.ToLower(name)]
 
