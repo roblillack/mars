@@ -4,7 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased](https://github.com/roblillack/mars/compare/v1.0.0...master)
 * Router: Fix panic, if no router initialized. #10
-* Templates: Fix panic, if no template loader initialized. #11
+* Templates:
+    * Fix panic, if no template loader initialized. #11
+    * Setup fallback template loader to use embedded templates without configuration. #12
 
 ## [v1.0.0](https://github.com/roblillack/mars/compare/a9a2ff4...v1.0.0)
 * Let's make that 1.0.0.

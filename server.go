@@ -105,6 +105,7 @@ func initGracefulShutdown() {
 
 func Run() {
 	wg := sync.WaitGroup{}
+	initializeFallbacks()
 	initGracefulShutdown()
 
 	if !HttpSsl || DualStackHTTP {

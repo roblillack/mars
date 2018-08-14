@@ -191,6 +191,14 @@ func NewTemplateLoader(paths []string) *TemplateLoader {
 	return loader
 }
 
+// emptyTemplateLoader creates an empty TemplateLoader that will only ever support the embedded Mars templates
+// for returning results.
+func emptyTemplateLoader() *TemplateLoader {
+	t := &TemplateLoader{}
+	t.Refresh()
+	return t
+}
+
 func (loader *TemplateLoader) createEmptyTemplateSet() *Error {
 	// Create the template set.  This panics if any of the funcs do not
 	// conform to expectations, so we wrap it in a func and handle those

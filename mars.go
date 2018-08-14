@@ -227,6 +227,14 @@ func InitDefaults(mode, basePath string) {
 	runStartupHooks()
 }
 
+// initializeFallbacks will setup all configuration options that are needed for serving results but might not have
+// been initialized correctly by the consumer of the toolkit
+func initializeFallbacks() {
+	if MainTemplateLoader == nil {
+		MainTemplateLoader = emptyTemplateLoader()
+	}
+}
+
 // SetupViews will create a template loader for all the templates provided in ViewsPath
 func SetupViews() {
 	MainTemplateLoader = NewTemplateLoader([]string{path.Join(BasePath, ViewsPath)})
