@@ -6,6 +6,7 @@ A lightweight web toolkit for the [Go language](http://www.golang.org).
 [![Build Status](https://secure.travis-ci.org/roblillack/mars.svg?branch=master)](http://travis-ci.org/roblillack/mars)
 [![Documentation Status](https://readthedocs.org/projects/mars/badge/?version=latest)](http://mars.readthedocs.org/en/latest/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/github/roblillack/mars/badge.svg?branch=master)](https://coveralls.io/github/roblillack/mars?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/roblillack/mars)](https://goreportcard.com/report/github.com/roblillack/mars)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 - Latest Mars version: 1.0.1
