@@ -3,6 +3,8 @@ All notable changes to Mars will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased](https://github.com/roblillack/mars/compare/v1.0.1...master)
+* Defaults:
+    * Fix mime type for Python bytecode.
 
 ## [v1.0.1](https://github.com/roblillack/mars/compare/v1.0.0...v1.0.1)
 * Router: Fix panic, if no router initialized. #10
