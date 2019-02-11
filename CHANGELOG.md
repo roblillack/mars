@@ -2,9 +2,15 @@
 All notable changes to Mars will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [Unreleased](https://github.com/roblillack/mars/compare/v1.0.1...master)
+## [Unreleased](https://github.com/roblillack/mars/compare/v1.0.2...master)
+
+## [v1.0.2](https://github.com/roblillack/mars/compare/v1.0.1...v1.0.2)
 * Defaults:
     * Fix mime type for Python bytecode.
+* Infrastructure:
+    * Add AppVeyor for automated builds & tests on Windows.
+    * Fix tests when running in Go Modules mode.
+    * Fix `got vet ./...` issues.
 
 ## [v1.0.1](https://github.com/roblillack/mars/compare/v1.0.0...v1.0.1)
 * Router: Fix panic, if no router initialized. #10

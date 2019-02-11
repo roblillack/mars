@@ -10,8 +10,8 @@ A lightweight web toolkit for the [Go language](http://www.golang.org).
 [![Go Report Card](https://goreportcard.com/badge/github.com/roblillack/mars)](https://goreportcard.com/report/github.com/roblillack/mars)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-- Latest Mars version: 1.0.1
-- Support Go versions: 1.8 … 1.11
+- Latest Mars version: 1.0.2
+- Supported Go versions: 1.8 … 1.11
 
 Mars is a fork of the fantastic, yet not-that-idiomatic-and-pretty-much-abandoned, [Revel framework](https://github.com/revel/revel). You might take a look at the corresponding documentation for the time being.
 
