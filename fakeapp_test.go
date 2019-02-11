@@ -41,7 +41,6 @@ func (c Hotels) Index() Result {
 
 func (c Hotels) Boom() Result {
 	panic("OMG")
-	return nil
 }
 
 func (c MyStatic) Serve(prefix, filepath string) Result {

@@ -45,10 +45,10 @@ func TestTypeExpr(t *testing.T) {
 		}
 
 		if array {
-			expr = &ast.ArrayType{expr.Pos(), nil, expr}
+			expr = &ast.ArrayType{Lbrack: expr.Pos(), Len: nil, Elt: expr}
 		}
 		if ellipsis {
-			expr = &ast.Ellipsis{expr.Pos(), expr}
+			expr = &ast.Ellipsis{Ellipsis: expr.Pos(), Elt: expr}
 		}
 
 		actual := NewTypeExpr("pkg", expr)
