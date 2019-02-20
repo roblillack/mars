@@ -104,6 +104,14 @@ func initGracefulShutdown() {
 }
 
 func Run() {
+	if !setupDone {
+		setup()
+	}
+
+	if DevMode {
+		INFO.Printf("Development mode enabled.")
+	}
+
 	wg := sync.WaitGroup{}
 	initializeFallbacks()
 	initGracefulShutdown()

@@ -3,6 +3,8 @@ All notable changes to Mars will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased](https://github.com/roblillack/mars/compare/v1.0.2...master)
+* Mars can now be started without calling [InitDefaults()](https://godoc.org/github.com/roblillack/mars#InitDefaults)
+  before. #13
 
 ## [v1.0.2](https://github.com/roblillack/mars/compare/v1.0.1...v1.0.2)
 * Defaults:

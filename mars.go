@@ -98,6 +98,8 @@ var (
 
 	// Private
 	secretKey []byte // Key used to sign cookies. An empty key disables signing.
+
+	setupDone bool
 )
 
 func SetAppSecret(secret string) {
@@ -210,9 +212,13 @@ func InitDefaults(mode, basePath string) {
 	WARN = getLogger("warn", WARN)
 	ERROR = getLogger("error", ERROR)
 
+	setup()
+}
+
+func setup() {
 	// The "watch" config variable can turn on and off all watching.
 	// (As a convenient way to control it all together.)
-	if Config.BoolDefault("watch", true) {
+	if Config.BoolDefault("watch", DevMode) {
 		MainWatcher = NewWatcher()
 		Filters = append([]Filter{WatchFilter}, Filters...)
 	}
@@ -225,6 +231,8 @@ func InitDefaults(mode, basePath string) {
 	}
 
 	runStartupHooks()
+
+	setupDone = true
 }
 
 // initializeFallbacks will setup all configuration options that are needed for serving results but might not have
