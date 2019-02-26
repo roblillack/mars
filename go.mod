@@ -1,5 +1,7 @@
 module github.com/roblillack/mars
 
+go 1.8
+
 require (
 	github.com/agtorre/gocolorize v1.0.0
 	github.com/codegangsta/cli v1.20.0
