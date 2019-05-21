@@ -6,8 +6,6 @@ github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/robfig/config v0.0.0-20141207224736-0f78529c8c7e h1:3/9k/etUfgykjM3Rx8X0echJzo7gNNeND/ubPkqYw1k=
 github.com/robfig/config v0.0.0-20141207224736-0f78529c8c7e/go.mod h1:Zerq1qYbCKtIIU9QgPydffGlpYfZ8KI/si49wuTLY/Q=
-github.com/robfig/pathtree v0.0.0-20140121041023-41257a1839e9 h1:UfIkqMA/eAkbd4vGO76WgCzF4ER1biu0H85Ndx76Zl8=
-github.com/robfig/pathtree v0.0.0-20140121041023-41257a1839e9/go.mod h1:JaRC3xDjyqUuG0WqmqTTv7FXV+y5EotwIUQcFWgSsxA=
 golang.org/x/net v0.0.0-20180811021610-c39426892332 h1:efGso+ep0DjyCBJPjvoz0HI6UldX4Md2F1rZFe1ir0E=
 golang.org/x/net v0.0.0-20180811021610-c39426892332/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/sys v0.0.0-20180810173357-98c5dad5d1a0 h1:8H8QZJ30plJyIVj60H3lr8TZGIq2Fh3Cyrs/ZNg1foU=

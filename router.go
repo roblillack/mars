@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/robfig/pathtree"
+	"github.com/roblillack/mars/internal/pathtree"
 )
 
 type Route struct {
