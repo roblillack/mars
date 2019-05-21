@@ -22,6 +22,9 @@
 // extension. This allows for routes like '/users/:id.json', which will not
 // conflict with '/users/:id'.
 //
+// Additionally, extensions might be variable, too, to allow for paths like
+// `/users/:id.:extension` and `/assets/logo.:ext`.
+//
 // Algorithm
 //
 // Paths are mapped to the tree in the following way:
@@ -37,22 +40,25 @@ package pathtree
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
 type Node struct {
-	edges      map[string]*Node // the various path elements leading out of this node.
-	wildcard   *Node            // if set, this node had a wildcard as its path element.
-	leaf       *Leaf            // if set, this is a terminal node for this leaf.
-	extensions map[string]*Leaf // if set, this is a terminal node with a leaf that ends in a specific extension.
-	star       *Leaf            // if set, this path ends in a star.
-	leafs      int              // counter for # leafs in the tree
+	edges           map[string]*Node // the various path elements leading out of this node.
+	wildcard        *Node            // if set, this node had a wildcard as its path element.
+	leaf            *Leaf            // if set, this is a terminal node for this leaf.
+	extensions      map[string]*Leaf // if set, this is a terminal node with a leaf that ends in a specific extension.
+	wildcardExtLeaf *Leaf            // if set, this is a terminal node with a leaf for wildcard file extensions.
+	star            *Leaf            // if set, this path ends in a star.
+	leafs           int              // counter for # leafs in the tree
 }
 
 type Leaf struct {
-	Value     interface{} // the value associated with this node
-	Wildcards []string    // the wildcard names, in order they appear in the path
-	order     int         // the order this leaf was added
+	Value       interface{} // the value associated with this node
+	Wildcards   []string    // the wildcard names, in order they appear in the path
+	ExtWildcard string      // if set, this is the wildcard used for the file extension
+	order       int         // the order this leaf was added
 }
 
 // New returns a new path tree.
@@ -75,13 +81,21 @@ func (n *Node) Add(key string, val interface{}) error {
 // Adds a leaf to a terminal node.
 // If the last wildcard contains an extension, add it to the 'extensions' map.
 func (n *Node) addLeaf(leaf *Leaf) error {
+	if leaf.ExtWildcard != "" {
+		if n.wildcardExtLeaf != nil {
+			return errors.New("duplicate path")
+		}
+		n.wildcardExtLeaf = leaf
+		return nil
+	}
+
 	extension := stripExtensionFromLastSegment(leaf.Wildcards)
-	if extension != "" {
+	if extension != "" && leaf.ExtWildcard == "" {
 		if n.extensions == nil {
 			n.extensions = make(map[string]*Leaf)
 		}
 		if n.extensions[extension] != nil {
-			return errors.New("duplicate path")
+			return fmt.Errorf("duplicate path for extension %s", extension)
 		}
 		n.extensions[extension] = leaf
 		return nil
@@ -101,6 +115,13 @@ func (n *Node) add(order int, elements, wildcards []string, val interface{}) err
 			Value:     val,
 			Wildcards: wildcards,
 		}
+		if len(wildcards) > 0 {
+			base, ext := extensionForPath(wildcards[len(wildcards)-1])
+			if len(ext) > 2 && ext[1] == ':' {
+				leaf.ExtWildcard = ext[2:]
+				leaf.Wildcards[len(leaf.Wildcards)-1] = base
+			}
+		}
 		return n.addLeaf(leaf)
 	}
 
@@ -119,7 +140,7 @@ func (n *Node) add(order int, elements, wildcards []string, val interface{}) err
 		return n.wildcard.add(order, elements, append(wildcards, el[1:]), val)
 	case '*':
 		if n.star != nil {
-			return errors.New("duplicate path")
+			return fmt.Errorf("duplicate path: %v %v", elements, wildcards)
 		}
 		n.star = &Leaf{
 			order:     order,
@@ -127,6 +148,29 @@ func (n *Node) add(order int, elements, wildcards []string, val interface{}) err
 			Wildcards: append(wildcards, el[1:]),
 		}
 		return nil
+	}
+
+	// Non-wildcard path element with variable extension, create a "normal" node with
+	// just an ExtWildcard leaf.
+	base, ext := extensionForPath(el)
+	if len(ext) > 2 && ext[1] == ':' {
+		if len(elements) == 0 {
+			el = base
+			wildcards = []string{ext[1:]}
+
+			e, ok := n.edges[base]
+			if !ok {
+				e = New()
+				n.edges[base] = e
+			}
+
+			return e.addLeaf(&Leaf{
+				order:       order,
+				Value:       val,
+				Wildcards:   wildcards,
+				ExtWildcard: ext[2:],
+			})
+		}
 	}
 
 	// It's a normal path element.
@@ -150,16 +194,29 @@ func (n *Node) Find(key string) (leaf *Leaf, expansions []string) {
 }
 
 func (n *Node) find(elements, exp []string) (leaf *Leaf, expansions []string) {
+
 	if len(elements) == 0 {
-		// If this node has explicit extensions, check if the path matches one.
-		if len(exp) > 0 && n.extensions != nil {
+		if len(exp) > 0 {
 			lastExp := exp[len(exp)-1]
-			prefix, extension := extensionForPath(lastExp)
-			if leaf := n.extensions[extension]; leaf != nil {
-				exp[len(exp)-1] = prefix
-				return leaf, exp
+			base, ext := extensionForPath(lastExp)
+
+			if ext != "" {
+				// If this node has explicit extensions, check if the path matches one.
+				if n.extensions != nil {
+					if leaf := n.extensions[ext]; leaf != nil {
+						exp[len(exp)-1] = base
+						return leaf, exp
+					}
+				}
+
+				if n.wildcardExtLeaf != nil {
+					exp[len(exp)-1] = base
+					expansions := append(exp, ext[1:])
+					return n.wildcardExtLeaf, expansions
+				}
 			}
 		}
+
 		return n.leaf, exp
 	}
 
@@ -174,6 +231,15 @@ func (n *Node) find(elements, exp []string) (leaf *Leaf, expansions []string) {
 	el, elements = elements[0], elements[1:]
 	if nextNode, ok := n.edges[el]; ok {
 		leaf, expansions = nextNode.find(elements, exp)
+	}
+
+	// Handle fixed path elements with variable extension
+	if leaf == nil && len(elements) == 0 {
+		if base, ext := extensionForPath(el); ext != "" {
+			if nextNode, ok := n.edges[base]; ok && nextNode.wildcardExtLeaf != nil {
+				return nextNode.wildcardExtLeaf, append(exp, ext[1:])
+			}
+		}
 	}
 
 	// Handle colon

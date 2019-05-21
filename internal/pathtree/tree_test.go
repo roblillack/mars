@@ -85,6 +85,42 @@ func TestExtensions(t *testing.T) {
 	found(t, n, "/other/b.xml", []string{"other", "b.xml"}, 3)
 }
 
+func TestNonFittingExtensions(t *testing.T) {
+	n := New()
+
+	n.Add("/:first/:second.json", 1)
+	n.Add("/a/:second.xml", 2)
+
+	notfound(t, n, "/a/b")
+	notfound(t, n, "/a/b.png")
+}
+
+func TestVariableExtensions(t *testing.T) {
+	n := New()
+
+	n.Add("/a/b.:ext", `ext`)
+	n.Add("/a/:filename.json", `base`)
+	n.Add("/a/:filename.:ext", `baseext`)
+	n.Add("/:first/:second.:ext", `dirbaseext`)
+
+	// Fixed path with variable extension will always get higher priority than variable filename with fixed extension
+	found(t, n, "/a/b.json", []string{"json"}, `ext`)
+	found(t, n, "/a/somefile.json", []string{"somefile"}, `base`)
+	found(t, n, "/a/somefile.xml", []string{"somefile", "xml"}, `baseext`)
+	found(t, n, "/a/b.xml", []string{"xml"}, `ext`)
+	found(t, n, "/other/b.xml", []string{"other", "b", "xml"}, `dirbaseext`)
+}
+
+func TestNonFittingVariableExtensions(t *testing.T) {
+	n := New()
+
+	n.Add("/first/:second.:ext", 1)
+	n.Add("/a/b.:ext", 2)
+
+	notfound(t, n, "/a/b")
+	notfound(t, n, "/first/file")
+}
+
 func TestErrors(t *testing.T) {
 	n := New()
 	fails(t, n.Add("//", 1), "empty path elements not allowed")
@@ -121,7 +157,7 @@ func BenchmarkTree100(b *testing.B) {
 	// b.Logf("Adding /public/*filepath")
 
 	queries := map[string]string{
-		"/": "root",
+		"/":                                 "root",
 		"/dir0/dir1/dir2/dir3/resource4":    "literal",
 		"/dir0/dir1/resource97":             "literal",
 		"/dir0/variable":                    "var",
