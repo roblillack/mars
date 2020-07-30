@@ -12,9 +12,12 @@ go:
   - 1.14
   - tip
 
+env:
+  - GO111MODULE=on
+
 before_install:
-   - go get github.com/mattn/goveralls
-   - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
+  - go get golang.org/x/tools/cmd/cover
 
 script:
-    - $HOME/gopath/bin/goveralls -service=travis-ci
+  - $HOME/gopath/bin/goveralls -service=travis-ci
