@@ -149,14 +149,14 @@ func processPackage(fset *token.FileSet, pkgImportPath, pkgPath string, pkg *ast
 	)
 
 	// For each source file in the package...
-	for _, file := range getSortedFiles(pkg) {
+	for _, fInfo := range getSortedFiles(pkg) {
 
 		// Imports maps the package key to the full import path.
 		// e.g. import "sample/app/models" => "models": "sample/app/models"
 		imports := map[string]string{}
 
 		// For each declaration in the source file...
-		for _, decl := range file.Decls {
+		for _, decl := range fInfo.File.Decls {
 			addImports(imports, decl, pkgPath)
 
 			// Match and add both structs and methods
@@ -219,9 +219,15 @@ func addImports(imports map[string]string, decl ast.Decl, srcDir string) {
 		// to see what the package name is.
 		// TODO: Can improve performance here a lot:
 		// 1. Do not import everything over and over again.  Keep a cache.
-		// 2. Exempt the standard library; their directories always match the package name.
+		// 2. (Done ✓) Exempt the standard library; their directories always match the package name.
 		// 3. Can use build.FindOnly and then use parser.ParseDir with mode PackageClauseOnly
 		if pkgAlias == "" {
+			if !strings.Contains(fullPath, ".") {
+				// go standard library packages ==> package will always match directory name
+				imports[fullPath[strings.Index(fullPath, "/")+1:]] = fullPath
+				continue
+			}
+
 			if fullPath == mars.MarsImportPath {
 				// Don't expect Mars to be resolvable during code generation …
 				imports["mars"] = mars.MarsImportPath
