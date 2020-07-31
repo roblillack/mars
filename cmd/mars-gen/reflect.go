@@ -196,6 +196,9 @@ func getFuncName(funcDecl *ast.FuncDecl) string {
 	return prefix + funcDecl.Name.Name
 }
 
+// full path --> package name
+var importsCache = map[string]string{}
+
 func addImports(imports map[string]string, decl ast.Decl, srcDir string) {
 	genDecl, ok := decl.(*ast.GenDecl)
 	if !ok {
@@ -218,38 +221,46 @@ func addImports(imports map[string]string, decl ast.Decl, srcDir string) {
 		quotedPath := importSpec.Path.Value           // e.g. "\"sample/app/models\""
 		fullPath := quotedPath[1 : len(quotedPath)-1] // Remove the quotes
 
-		// If the package was not aliased (common case), we have to import it
-		// to see what the package name is.
-		// TODO: Can improve performance here a lot:
-		// 1. Do not import everything over and over again.  Keep a cache.
-		// 2. (Done ✓) Exempt the standard library; their directories always match the package name.
-		// 3. Can use build.FindOnly and then use parser.ParseDir with mode PackageClauseOnly
-		if pkgAlias == "" {
-			if !strings.Contains(fullPath, ".") {
-				// go standard library packages ==> package will always match directory name
-				imports[fullPath[strings.Index(fullPath, "/")+1:]] = fullPath
-				continue
-			}
-
-			if fullPath == mars.MarsImportPath {
-				// Don't expect Mars to be resolvable during code generation …
-				imports["mars"] = mars.MarsImportPath
-				continue
-			}
-
-			pkg, err := build.Import(fullPath, srcDir, 0)
-			if err != nil {
-				// We expect this to happen for apps using reverse routing (since we
-				// have not yet generated the routes).  Don't log that.
-				if !strings.HasSuffix(fullPath, "/app/routes") {
-					mars.TRACE.Println("Could not find import:", fullPath)
-				}
-				continue
-			}
-			pkgAlias = pkg.Name
+		if pkgAlias != "" {
+			imports[pkgAlias] = fullPath
+			continue
 		}
 
+		if n, ok := importsCache[fullPath]; ok {
+			imports[n] = fullPath
+			continue
+		}
+
+		if !strings.Contains(fullPath, ".") {
+			// go standard library packages ==> package will always match directory name
+			imports[fullPath[strings.Index(fullPath, "/")+1:]] = fullPath
+			continue
+		}
+
+		if fullPath == mars.MarsImportPath {
+			// Don't expect Mars to be resolvable during code generation …
+			imports["mars"] = mars.MarsImportPath
+			continue
+		}
+
+		// If the package was not aliased (common case) and is not part of the standard library,
+		// we need to import it to figure out what the package name is.
+		// TODO: We can improve performance here a bit:
+		//       Use build.FindOnly and then use parser.ParseDir with mode PackageClauseOnly
+		pkg, err := build.Import(fullPath, srcDir, 0)
+		if err != nil {
+			// We expect this to happen for apps using reverse routing (since we
+			// have not yet generated the routes).  Don't log that.
+			if !strings.HasSuffix(fullPath, "/app/routes") {
+				mars.TRACE.Println("Could not find import:", fullPath)
+			}
+			continue
+		}
+		pkgAlias = pkg.Name
 		imports[pkgAlias] = fullPath
+
+		// ok, spare us the search next time
+		importsCache[fullPath] = pkgAlias
 	}
 }
 
