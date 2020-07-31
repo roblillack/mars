@@ -19,8 +19,15 @@ func fatalf(layout string, args ...interface{}) {
 
 func main() {
 	app := cli.NewApp()
+	app.HideVersion = true
 	app.Name = "mars-gen"
 	app.Usage = "Code generation tool for the Mars web framework"
+	app.Flags = []cli.Flag{
+		cli.BoolFlag{
+			Name:  "verbose, v",
+			Usage: "Prints the names of the source files as they are parsed",
+		},
+	}
 	app.Commands = []cli.Command{
 		{
 			Name:   "register-controllers",
@@ -67,7 +74,7 @@ func registerControllers(ctx *cli.Context) {
 		dir = ctx.Args()[0]
 	}
 
-	sourceInfo, procErr := ProcessSource(dir)
+	sourceInfo, procErr := ProcessSource(dir, ctx.GlobalBool("v"))
 	if procErr != nil {
 		fatalf(procErr.Error())
 	}
@@ -87,7 +94,7 @@ func reverseRoutes(ctx *cli.Context) {
 		dir = ctx.Args()[0]
 	}
 
-	sourceInfo, procErr := ProcessSource(dir)
+	sourceInfo, procErr := ProcessSource(dir, ctx.GlobalBool("v"))
 	if procErr != nil {
 		fatalf(procErr.Error())
 	}

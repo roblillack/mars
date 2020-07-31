@@ -104,7 +104,7 @@ type methodMap map[string][]*MethodSpec
 
 // ProcessSource parses the app's controllers directory and return a list of
 // the controller types found. Returns a CompileError if the parsing fails.
-func ProcessSource(path string) (*SourceInfo, error) {
+func ProcessSource(path string, verbose bool) (*SourceInfo, error) {
 	// Parse files within the path.
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, path, func(f os.FileInfo) bool {
@@ -126,7 +126,7 @@ func ProcessSource(path string) (*SourceInfo, error) {
 		pkg = v
 	}
 
-	return processPackage(fset, pkg.Name, path, pkg), nil
+	return processPackage(fset, pkg.Name, path, pkg, verbose), nil
 }
 
 // ProcessFile created a SourceInfo data structure similarly to ProcessSource,
@@ -137,10 +137,10 @@ func ProcessFile(fset *token.FileSet, fileName string, file *ast.File) *SourceIn
 		Files: map[string]*ast.File{fileName: file},
 	}
 
-	return processPackage(fset, file.Name.Name, filepath.Dir(fileName), pkg)
+	return processPackage(fset, file.Name.Name, filepath.Dir(fileName), pkg, false)
 }
 
-func processPackage(fset *token.FileSet, pkgImportPath, pkgPath string, pkg *ast.Package) *SourceInfo {
+func processPackage(fset *token.FileSet, pkgImportPath, pkgPath string, pkg *ast.Package, verbose bool) *SourceInfo {
 	var (
 		structSpecs     []*TypeInfo
 		initImportPaths []string
@@ -150,6 +150,9 @@ func processPackage(fset *token.FileSet, pkgImportPath, pkgPath string, pkg *ast
 
 	// For each source file in the package...
 	for _, fInfo := range getSortedFiles(pkg) {
+		if verbose {
+			fmt.Println(fInfo.Filename)
+		}
 
 		// Imports maps the package key to the full import path.
 		// e.g. import "sample/app/models" => "models": "sample/app/models"
