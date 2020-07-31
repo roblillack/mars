@@ -541,12 +541,11 @@ func (s *SourceInfo) CalcImportAliases() map[string]string {
 }
 
 func addAlias(aliases map[string]string, importPath, pkgName string) {
-	alias, ok := aliases[importPath]
-	if ok {
+	if _, ok := aliases[importPath]; ok {
 		return
 	}
-	alias = makePackageAlias(aliases, pkgName)
-	aliases[importPath] = alias
+
+	aliases[importPath] = makePackageAlias(aliases, pkgName)
 }
 
 func makePackageAlias(aliases map[string]string, pkgName string) string {
@@ -597,24 +596,24 @@ func NewTypeExpr(pkgName string, expr ast.Expr) TypeExpr {
 }
 
 var builtinTypes = map[string]struct{}{
-	"bool":       struct{}{},
-	"byte":       struct{}{},
-	"complex128": struct{}{},
-	"complex64":  struct{}{},
-	"error":      struct{}{},
-	"float32":    struct{}{},
-	"float64":    struct{}{},
-	"int":        struct{}{},
-	"int16":      struct{}{},
-	"int32":      struct{}{},
-	"int64":      struct{}{},
-	"int8":       struct{}{},
-	"rune":       struct{}{},
-	"string":     struct{}{},
-	"uint":       struct{}{},
-	"uint16":     struct{}{},
-	"uint32":     struct{}{},
-	"uint64":     struct{}{},
-	"uint8":      struct{}{},
-	"uintptr":    struct{}{},
+	"bool":       {},
+	"byte":       {},
+	"complex128": {},
+	"complex64":  {},
+	"error":      {},
+	"float32":    {},
+	"float64":    {},
+	"int":        {},
+	"int16":      {},
+	"int32":      {},
+	"int64":      {},
+	"int8":       {},
+	"rune":       {},
+	"string":     {},
+	"uint":       {},
+	"uint16":     {},
+	"uint32":     {},
+	"uint64":     {},
+	"uint8":      {},
+	"uintptr":    {},
 }

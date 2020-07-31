@@ -10,18 +10,18 @@ import (
 )
 
 var TypeExprs = map[string]TypeExpr{
-	"int":        TypeExpr{"int", "", 0, true},
-	"*int":       TypeExpr{"*int", "", 1, true},
-	"[]int":      TypeExpr{"[]int", "", 2, true},
-	"...int":     TypeExpr{"[]int", "", 2, true},
-	"[]*int":     TypeExpr{"[]*int", "", 3, true},
-	"...*int":    TypeExpr{"[]*int", "", 3, true},
-	"MyType":     TypeExpr{"MyType", "pkg", 0, true},
-	"*MyType":    TypeExpr{"*MyType", "pkg", 1, true},
-	"[]MyType":   TypeExpr{"[]MyType", "pkg", 2, true},
-	"...MyType":  TypeExpr{"[]MyType", "pkg", 2, true},
-	"[]*MyType":  TypeExpr{"[]*MyType", "pkg", 3, true},
-	"...*MyType": TypeExpr{"[]*MyType", "pkg", 3, true},
+	"int":        {"int", "", 0, true},
+	"*int":       {"*int", "", 1, true},
+	"[]int":      {"[]int", "", 2, true},
+	"...int":     {"[]int", "", 2, true},
+	"[]*int":     {"[]*int", "", 3, true},
+	"...*int":    {"[]*int", "", 3, true},
+	"MyType":     {"MyType", "pkg", 0, true},
+	"*MyType":    {"*MyType", "pkg", 1, true},
+	"[]MyType":   {"[]MyType", "pkg", 2, true},
+	"...MyType":  {"[]MyType", "pkg", 2, true},
+	"[]*MyType":  {"[]*MyType", "pkg", 3, true},
+	"...*MyType": {"[]*MyType", "pkg", 3, true},
 }
 
 func TestTypeExpr(t *testing.T) {
@@ -156,7 +156,7 @@ func stringSlicesEqual(a, b []string) bool {
 		Slice []string
 		Other []string
 	}
-	for _, t := range []direction{direction{a, b}, direction{b, a}} {
+	for _, t := range []direction{{a, b}, {b, a}} {
 		for idx, v := range t.Slice {
 			if idx >= len(t.Other) || t.Other[idx] != v {
 				return false
@@ -186,7 +186,7 @@ func (s *MethodSpec) Equals(o *MethodSpec) bool {
 		Slice []*MethodArg
 		Other []*MethodArg
 	}
-	for _, t := range []direction{direction{s.Args, o.Args}, direction{o.Args, s.Args}} {
+	for _, t := range []direction{{s.Args, o.Args}, {o.Args, s.Args}} {
 		for idx, v := range t.Slice {
 			if idx >= len(t.Other) || !v.Equals(t.Other[idx]) {
 				return false
@@ -205,7 +205,7 @@ func (i *TypeInfo) Equals(o *TypeInfo) bool {
 		Slice []*MethodSpec
 		Other []*MethodSpec
 	}
-	for _, t := range []direction{direction{i.MethodSpecs, o.MethodSpecs}, direction{o.MethodSpecs, i.MethodSpecs}} {
+	for _, t := range []direction{{i.MethodSpecs, o.MethodSpecs}, {o.MethodSpecs, i.MethodSpecs}} {
 		for idx, v := range t.Slice {
 			if idx >= len(t.Other) || !v.Equals(t.Other[idx]) {
 				return false
@@ -253,27 +253,19 @@ func TestProcessingSource(t *testing.T) {
 		ImportPath:  "test",
 		PackageName: "test",
 		MethodSpecs: []*MethodSpec{
-			&MethodSpec{
+			{
 				Name: "Show",
 				Args: []*MethodArg{
-					&MethodArg{
-						Name:       "id",
-						ImportPath: "",
-						TypeExpr:   TypeExpr{"int", "", 0, true},
-					},
+					{Name: "id", ImportPath: "", TypeExpr: TypeExpr{"int", "", 0, true}},
 				},
 			},
-			&MethodSpec{
+			{
 				Name: "Book",
 				Args: []*MethodArg{
-					&MethodArg{
-						Name:       "id",
-						ImportPath: "",
-						TypeExpr:   TypeExpr{"int", "", 0, true},
-					},
+					{Name: "id", ImportPath: "", TypeExpr: TypeExpr{"int", "", 0, true}},
 				},
 			},
-			&MethodSpec{
+			{
 				Name: "Index",
 			},
 		},
@@ -286,19 +278,11 @@ func TestProcessingSource(t *testing.T) {
 		ImportPath:  "test",
 		PackageName: "test",
 		MethodSpecs: []*MethodSpec{
-			&MethodSpec{
+			{
 				Name: "Serve",
 				Args: []*MethodArg{
-					&MethodArg{
-						Name:       "prefix",
-						ImportPath: "",
-						TypeExpr:   TypeExpr{"string", "", 0, true},
-					},
-					&MethodArg{
-						Name:       "filepath",
-						ImportPath: "",
-						TypeExpr:   TypeExpr{"string", "", 0, true},
-					},
+					{Name: "prefix", ImportPath: "", TypeExpr: TypeExpr{"string", "", 0, true}},
+					{Name: "filepath", ImportPath: "", TypeExpr: TypeExpr{"string", "", 0, true}},
 				},
 			},
 		},
