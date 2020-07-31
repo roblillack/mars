@@ -14,9 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Infrastructure:
   - Remove support for Go 1.8 to 1.11, depend on Go Modules by default.
 - Usage:
-  - Introduce automatic `setup` process for TemplateLoader and Router.
-    Mars can now be started without calling [InitDefaults()](https://godoc.org/github.com/roblillack/mars#InitDefaults)
-    before. #13
+  - Introduce automatic `setup` process for TemplateLoader and Router. Mars can now be started without calling [InitDefaults()](https://godoc.org/github.com/roblillack/mars#InitDefaults) before. #13
 - Code generation:
   - Add functional tests. #19
   - Improve parsing speed, by skipping unnecessary imports of the Go standard library. #19
