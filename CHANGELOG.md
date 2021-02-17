@@ -3,7 +3,11 @@
 All notable changes to Mars will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [Unreleased](https://github.com/roblillack/mars/compare/v1.0.3...master)
+## [Unreleased](https://github.com/roblillack/mars/compare/v1.0.4...master)
+
+- Add unit test for `cert`.
+
+## [v1.0.4](https://github.com/roblillack/mars/compare/v1.0.3...v1.0.4)
 
 - Code generation:
   - Add package name cache to speed up parsing very large code bases. #19
