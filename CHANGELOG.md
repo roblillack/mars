@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [Unreleased](https://github.com/roblillack/mars/compare/v1.0.4...master)
 
 - Add unit test for `cert`.
+- Improve code generation to not write redundant type information. #20
 
 ## [v1.0.4](https://github.com/roblillack/mars/compare/v1.0.3...v1.0.4)
 

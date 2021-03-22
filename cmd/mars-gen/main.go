@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go/format"
 	"os"
 	"path"
 	"text/template"
@@ -121,7 +122,12 @@ func generateSources(tpl, filename string, templateArgs map[string]interface{}) 
 	}
 	defer file.Close()
 
-	if _, err := file.WriteString(sourceCode); err != nil {
+	formatted, err := format.Source([]byte(sourceCode))
+	if err != nil {
+		fatalf("Failed to format file: %v", err)
+	}
+
+	if _, err := file.Write(formatted); err != nil {
 		fatalf("Failed to write to file: %v", err)
 	}
 }
@@ -144,10 +150,10 @@ func {{.functionName}}() {
 	{{range $i, $c := .controllers}}
 	mars.RegisterController((*{{.StructName}})(nil),
 		[]*mars.MethodType{
-			{{range .MethodSpecs}}&mars.MethodType{
+			{{range .MethodSpecs}}{
 				Name: "{{.Name}}",
 				Args: []*mars.MethodArg{ {{range .Args}}
-					&mars.MethodArg{Name: "{{.Name}}", Type: reflect.TypeOf((*{{index $.ImportPaths .ImportPath | .TypeExpr.TypeName}})(nil)) },{{end}}
+					{Name: "{{.Name}}", Type: reflect.TypeOf((*{{index $.ImportPaths .ImportPath | .TypeExpr.TypeName}})(nil)) },{{end}}
 				},
 			},
 			{{end}}
