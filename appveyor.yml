@@ -1,6 +1,6 @@
 build: off
 
-stack: go 1.14
+stack: go 1.16
 
 before_test:
   - go vet ./...
