@@ -3,6 +3,7 @@ package watcher
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"testing"
@@ -21,7 +22,9 @@ func (l *SimpleRefresher) Refresh() error {
 
 func TestWatcher(t *testing.T) {
 	w := New()
-	tmp, err := os.MkdirTemp("", "mars-watcher-test")
+
+	tmp := filepath.Join(os.TempDir(), fmt.Sprintf("mars-watcher-test-%d", rand.Uint32()))
+	err := os.MkdirAll(tmp, 0700)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +65,9 @@ func TestWatcher(t *testing.T) {
 
 func TestErrorWhileRefreshing(t *testing.T) {
 	w := New()
-	tmp, err := os.MkdirTemp("", "mars-watcher-test")
+
+	tmp := filepath.Join(os.TempDir(), fmt.Sprintf("mars-watcher-test-%d", rand.Uint32()))
+	err := os.MkdirAll(tmp, 0700)
 	if err != nil {
 		t.Fatal(err)
 	}
