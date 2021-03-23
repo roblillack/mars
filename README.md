@@ -17,7 +17,33 @@ Mars is a fork of the fantastic, yet not-that-idiomatic-and-pretty-much-abandone
 
 ## Quick Start
 
-Hah. Sorry, nothing here, yet. But if you want to switch a Revel project to Mars--see below.
+Getting started with Mars is as easy as:
+
+1. Adding the package to your project
+
+   ```sh
+   $ go get github.com/roblillack/mars
+   ```
+
+2. Creating an empty routes file in `conf/routes`
+
+   ```sh
+   $ mkdir conf; echo > conf/routes
+   ```
+
+3. Running the server as part of your main package
+
+   ```go
+   package main
+
+   import "github.com/roblillack/mars"
+
+   func main() {
+     mars.Run()
+   }
+   ```
+
+This essentially sets up an insecure server as part of your application that listens to HTTP (only) and responds to all requests with a 404. To learn where to go from here, please see the [Mars tutorial](http://mars.readthedocs.io/en/latest/getting-started/)
 
 ## Differences to Revel
 
