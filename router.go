@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/robfig/pathtree"
+	"github.com/roblillack/mars/internal/pathtree"
 )
 
 type Route struct {
@@ -20,7 +20,6 @@ type Route struct {
 	ControllerName string   // e.g. "Application", ""
 	MethodName     string   // e.g. "ShowApp", ""
 	FixedParams    []string // e.g. "arg1","arg2","arg3" (CSV formatting)
-	TreePath       string   // e.g. "/GET/app/:id"
 
 	routesPath string // e.g. /Users/robfig/gocode/src/myapp/conf/routes
 	line       int    // e.g. 3
@@ -57,7 +56,6 @@ func NewRoute(method, path, action, fixedArgs, routesPath string, line int) (r *
 		Path:        path,
 		Action:      action,
 		FixedParams: fargs,
-		TreePath:    treePath(strings.ToUpper(method), path),
 		routesPath:  routesPath,
 		line:        line,
 	}
@@ -77,11 +75,12 @@ func NewRoute(method, path, action, fixedArgs, routesPath string, line int) (r *
 	return
 }
 
-func treePath(method, path string) string {
+func (r Route) TreePath() string {
+	method := r.Method
 	if method == "*" {
 		method = ":METHOD"
 	}
-	return "/" + method + path
+	return "/" + method + r.Path
 }
 
 type Router struct {
@@ -102,7 +101,7 @@ func (router *Router) Route(req *http.Request) *RouteMatch {
 		return nil
 	}
 
-	leaf, expansions := router.Tree.Find(treePath(req.Method, req.URL.Path))
+	leaf, expansions := router.Tree.Find(fmt.Sprintf("/%s%s", req.Method, req.URL.Path))
 	if leaf == nil {
 		return nil
 	}
@@ -112,8 +111,12 @@ func (router *Router) Route(req *http.Request) *RouteMatch {
 	var params url.Values
 	if len(expansions) > 0 {
 		params = make(url.Values)
-		for i, v := range expansions {
-			params[leaf.Wildcards[i]] = []string{v}
+		for idx, val := range expansions {
+			if len(leaf.Wildcards) > idx {
+				params[leaf.Wildcards[idx]] = []string{val}
+			} else if idx == len(leaf.Wildcards) && leaf.ExtWildcard != "" {
+				params[leaf.ExtWildcard] = []string{val}
+			}
 		}
 	}
 
@@ -153,11 +156,11 @@ func (router *Router) Refresh() (err *Error) {
 func (router *Router) updateTree() *Error {
 	router.Tree = pathtree.New()
 	for _, route := range router.Routes {
-		err := router.Tree.Add(route.TreePath, route)
+		err := router.Tree.Add(route.TreePath(), route)
 
 		// Allow GETs to respond to HEAD requests.
 		if err == nil && route.Method == "GET" {
-			err = router.Tree.Add(treePath("HEAD", route.Path), route)
+			err = router.Tree.Add("/HEAD"+route.Path, route)
 		}
 
 		// Error adding a route to the pathtree.
@@ -181,7 +184,7 @@ func parseRoutesFile(routesPath, joinedPath string, validate bool) ([]*Route, *E
 }
 
 // parseRoutes reads the content of a routes file into the routing table.
-func parseRoutes(routesPath, joinedPath, content string, validate bool) ([]*Route, *Error) {
+func parseRoutes(routesFilePath, joinedPath, content string, validate bool) ([]*Route, *Error) {
 	var routes []*Route
 
 	// For each line..
@@ -205,12 +208,12 @@ func parseRoutes(routesPath, joinedPath, content string, validate bool) ([]*Rout
 		}
 		path = strings.Join([]string{AppRoot, joinedPath, path}, "")
 
-		route := NewRoute(method, path, action, fixedArgs, routesPath, n)
+		route := NewRoute(method, path, action, fixedArgs, routesFilePath, n)
 		routes = append(routes, route)
 
 		if validate {
 			if err := validateRoute(route); err != nil {
-				return nil, routeError(err, routesPath, content, n)
+				return nil, routeError(err, routesFilePath, content, n)
 			}
 		}
 	}

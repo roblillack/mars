@@ -2,6 +2,7 @@ package mars
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -64,6 +65,13 @@ var routeTestCases = map[string]*Route{
 		},
 	},
 
+	"GET /files/:id.:extension Application.DownloadFile": &Route{
+		Method:      "GET",
+		Path:        "/files/:id.:extension",
+		Action:      "Application.DownloadFile",
+		FixedParams: []string{},
+	},
+
 	"* /apps/:id/:action Application.:action": &Route{
 		Method:      "*",
 		Path:        "/apps/:id/:action",
@@ -115,6 +123,7 @@ GET   /                          Application.Index
 GET   /test/                     Application.Index("Test", "Test2")
 GET   /app/:id/                  Application.Show
 GET   /app/:id.png               Application.ShowImage
+GET   /app/:id.:ext              Application.ShowImageCustomExtension
 GET   /app-wild/*id/             Application.WildShow
 POST  /app/:id                   Application.Save
 PATCH /app/:id/                  Application.Update
@@ -154,6 +163,26 @@ var routeMatchTestCases = map[*http.Request]*RouteMatch{
 		MethodName:     "Show",
 		FixedParams:    []string{},
 		Params:         map[string][]string{"id": {"123"}},
+	},
+
+	&http.Request{
+		Method: "GET",
+		URL:    &url.URL{Path: "/app/123.png"},
+	}: &RouteMatch{
+		ControllerName: "Application",
+		MethodName:     "ShowImage",
+		FixedParams:    []string{},
+		Params:         map[string][]string{"id": {"123"}},
+	},
+
+	&http.Request{
+		Method: "GET",
+		URL:    &url.URL{Path: "/app/123.jpg"},
+	}: &RouteMatch{
+		ControllerName: "Application",
+		MethodName:     "ShowImageCustomExtension",
+		FixedParams:    []string{},
+		Params:         map[string][]string{"id": {"123"}, "ext": {"jpg"}},
 	},
 
 	&http.Request{
@@ -271,7 +300,9 @@ func TestRouteMatches(t *testing.T) {
 	BasePath = "/BasePath"
 	router := NewRouter("")
 	router.Routes, _ = parseRoutes("", "", TEST_ROUTES, false)
-	router.updateTree()
+	if err := router.updateTree(); err != nil {
+		t.Fatalf("Error creating router: %s", err)
+	}
 	for req, expected := range routeMatchTestCases {
 		t.Log("Routing:", req.Method, req.URL)
 		actual := router.Route(req)
@@ -281,6 +312,9 @@ func TestRouteMatches(t *testing.T) {
 		eq(t, "ControllerName", actual.ControllerName, expected.ControllerName)
 		eq(t, "MethodName", actual.MethodName, expected.MethodName)
 		eq(t, "len(Params)", len(actual.Params), len(expected.Params))
+		if len(actual.Params) != len(expected.Params) {
+			log.Fatalln(actual.Params)
+		}
 		for key, actualValue := range actual.Params {
 			eq(t, "Params", actualValue[0], expected.Params[key][0])
 		}
@@ -514,9 +548,9 @@ func TestOverrideMethodFilter(t *testing.T) {
 
 // Helpers
 
-func eq(t *testing.T, name string, a, b interface{}) bool {
-	if a != b {
-		t.Error(name, ": (actual)", a, " != ", b, "(expected)")
+func eq(t *testing.T, name string, actual, expected interface{}) bool {
+	if actual != expected {
+		t.Error(name, ": (actual)", actual, " != ", expected, "(expected)")
 		return false
 	}
 	return true
