@@ -16,9 +16,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/roblillack/mars"
-
 	"golang.org/x/net/websocket"
+
+	"github.com/roblillack/mars"
 )
 
 type TestSuite struct {
@@ -276,13 +276,13 @@ func (t *TestSuite) AssertHeader(name, value string) {
 }
 
 func (t *TestSuite) AssertEqual(expected, actual interface{}) {
-	if !mars.Equal(expected, actual) {
+	if !Equal(expected, actual) {
 		panic(fmt.Errorf("(expected) %v != %v (actual)", expected, actual))
 	}
 }
 
 func (t *TestSuite) AssertNotEqual(expected, actual interface{}) {
-	if mars.Equal(expected, actual) {
+	if Equal(expected, actual) {
 		panic(fmt.Errorf("(expected) %v == %v (actual)", expected, actual))
 	}
 }

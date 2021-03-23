@@ -85,7 +85,7 @@ func FilterAction(methodRef interface{}) FilterConfigurator {
 	}
 
 	controllerType := methodType.In(0)
-	method := FindMethod(controllerType, methodValue)
+	method := findMethod(controllerType, methodValue)
 	if method == nil {
 		panic("Action not found on controller " + controllerType.Name())
 	}

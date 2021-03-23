@@ -470,6 +470,15 @@ func (loader *TemplateLoader) Template(name string, funcMaps ...Args) (Template,
 	return GoTemplate{tmpl, loader, funcMap}, err
 }
 
+// Reads the lines of the given file.
+func readLines(filename string) ([]string, error) {
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	return strings.Split(string(bytes), "\n"), nil
+}
+
 // Adapter for Go Templates.
 type GoTemplate struct {
 	*template.Template
@@ -487,7 +496,7 @@ func (gotmpl GoTemplate) Render(wr io.Writer, arg interface{}) error {
 }
 
 func (gotmpl GoTemplate) Content() []string {
-	content, _ := ReadLines(gotmpl.loader.templatePaths[gotmpl.Name()])
+	content, _ := readLines(gotmpl.loader.templatePaths[gotmpl.Name()])
 	return content
 }
 

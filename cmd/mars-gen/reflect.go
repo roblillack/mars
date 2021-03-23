@@ -33,8 +33,6 @@ type SourceInfo struct {
 	// controllerSpecs lists type info for all structs found under
 	// app/controllers/... that embed (directly or indirectly) mars.Controller
 	controllerSpecs []*TypeInfo
-	// testSuites list the types that constitute the set of application tests.
-	testSuites []*TypeInfo
 }
 
 // TypeInfo summarizes information about a struct type in the app source code.
@@ -445,6 +443,15 @@ func getStructTypeDecl(decl ast.Decl, fset *token.FileSet) (spec *ast.TypeSpec, 
 	return
 }
 
+func containsString(list []string, target string) bool {
+	for _, el := range list {
+		if el == target {
+			return true
+		}
+	}
+	return false
+}
+
 // TypesThatEmbed returns all types that (directly or indirectly) embed the
 // target type, which must be a fully qualified type name,
 // e.g. "github.com/roblillack/mars.Controller"
@@ -462,8 +469,7 @@ func (s *SourceInfo) TypesThatEmbed(targetType string) (filtered []*TypeInfo) {
 		// Look through all known structs.
 		for _, spec := range s.StructSpecs {
 			// If this one has been processed or is already in nodeQueue, then skip it.
-			if mars.ContainsString(processed, spec.String()) ||
-				mars.ContainsString(nodeQueue, spec.String()) {
+			if containsString(processed, spec.String()) || containsString(nodeQueue, spec.String()) {
 				continue
 			}
 
@@ -502,10 +508,19 @@ type TypeExpr struct {
 	Valid    bool
 }
 
+func firstNonEmpty(strs ...string) string {
+	for _, str := range strs {
+		if len(str) > 0 {
+			return str
+		}
+	}
+	return ""
+}
+
 // TypeName returns the fully-qualified type name for this expression.
 // The caller may optionally specify a package name to override the default.
 func (e TypeExpr) TypeName(pkgOverride string) string {
-	pkgName := mars.FirstNonEmpty(pkgOverride, e.PkgName)
+	pkgName := firstNonEmpty(pkgOverride, e.PkgName)
 	if pkgName == "" {
 		return e.Expr
 	}

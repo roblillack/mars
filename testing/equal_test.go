@@ -1,4 +1,4 @@
-package mars
+package testing
 
 import (
 	"reflect"
