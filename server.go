@@ -19,7 +19,7 @@ import (
 var (
 	MainRouter         *Router
 	MainTemplateLoader *TemplateLoader
-	MainWatcher        *watcher.Watcher
+	mainWatcher        *watcher.Watcher
 	Server             *http.Server
 	SecureServer       *http.Server
 )

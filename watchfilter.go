@@ -1,8 +1,8 @@
 package mars
 
 var WatchFilter = func(c *Controller, fc []Filter) {
-	if MainWatcher != nil {
-		err := MainWatcher.Notify()
+	if mainWatcher != nil {
+		err := mainWatcher.Notify()
 		if err != nil {
 			c.Result = c.RenderError(err)
 			return

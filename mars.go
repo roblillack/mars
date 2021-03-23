@@ -221,7 +221,7 @@ func setup() {
 	// The "watch" config variable can turn on and off all watching.
 	// (As a convenient way to control it all together.)
 	if Config.BoolDefault("watch", DevMode) {
-		MainWatcher = watcher.New()
+		mainWatcher = watcher.New()
 		Filters = append([]Filter{WatchFilter}, Filters...)
 	}
 
@@ -254,8 +254,8 @@ func SetupViews() {
 
 	// If desired (or by default), create a watcher for templates and routes.
 	// The watcher calls Refresh() on things on the first request.
-	if MainWatcher != nil && Config.BoolDefault("watch.templates", true) {
-		if err := MainWatcher.Listen(MainTemplateLoader, MainTemplateLoader.paths...); err != nil {
+	if mainWatcher != nil && Config.BoolDefault("watch.templates", true) {
+		if err := mainWatcher.Listen(MainTemplateLoader, MainTemplateLoader.paths...); err != nil {
 			ERROR.Fatalln(err)
 		}
 	}
@@ -272,8 +272,8 @@ func SetupRouter() {
 
 	// If desired (or by default), create a watcher for templates and routes.
 	// The watcher calls Refresh() on things on the first request.
-	if MainWatcher != nil && Config.BoolDefault("watch.routes", true) {
-		if err := MainWatcher.Listen(MainRouter, MainRouter.path); err != nil {
+	if mainWatcher != nil && Config.BoolDefault("watch.routes", true) {
+		if err := mainWatcher.Listen(MainRouter, MainRouter.path); err != nil {
 			ERROR.Fatalln(err)
 		}
 	}
