@@ -182,7 +182,7 @@ func BenchmarkTree100(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N/len(queries); i++ {
-		for k, _ := range queries {
+		for k := range queries {
 			n.Find(k)
 		}
 	}

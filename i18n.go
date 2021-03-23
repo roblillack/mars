@@ -31,7 +31,7 @@ var (
 func MessageLanguages() []string {
 	languages := make([]string, len(messages))
 	i := 0
-	for language, _ := range messages {
+	for language := range messages {
 		languages[i] = language
 		i++
 	}

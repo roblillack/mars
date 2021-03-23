@@ -8,8 +8,8 @@ import (
 
 func TestCertificateCreation(t *testing.T) {
 	for org, domains := range map[string][]string{
-		"ACME Inc.": []string{"acme.com", "acme.biz"},
-		"Me":        []string{"::1", "127.0.0.1"},
+		"ACME Inc.": {"acme.com", "acme.biz"},
+		"Me":        {"::1", "127.0.0.1"},
 	} {
 		keypair, err := createCertificate(org, strings.Join(domains, ", "))
 		if err != nil {

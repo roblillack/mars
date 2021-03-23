@@ -64,19 +64,19 @@ func (c MyStatic) Serve(prefix, filepath string) Result {
 func startFakeBookingApp() {
 	RegisterController((*Hotels)(nil),
 		[]*MethodType{
-			&MethodType{
+			{
 				Name: "Index",
 			},
-			&MethodType{
+			{
 				Name: "Boom",
 			},
-			&MethodType{
+			{
 				Name: "Show",
 				Args: []*MethodArg{
 					{"id", reflect.TypeOf((*int)(nil))},
 				},
 			},
-			&MethodType{
+			{
 				Name: "Book",
 				Args: []*MethodArg{
 					{"id", reflect.TypeOf((*int)(nil))},
@@ -86,11 +86,11 @@ func startFakeBookingApp() {
 
 	RegisterController((*Static)(nil),
 		[]*MethodType{
-			&MethodType{
+			{
 				Name: "Serve",
 				Args: []*MethodArg{
-					&MethodArg{Name: "prefix", Type: reflect.TypeOf((*string)(nil))},
-					&MethodArg{Name: "filepath", Type: reflect.TypeOf((*string)(nil))},
+					{Name: "prefix", Type: reflect.TypeOf((*string)(nil))},
+					{Name: "filepath", Type: reflect.TypeOf((*string)(nil))},
 				},
 			},
 		})
