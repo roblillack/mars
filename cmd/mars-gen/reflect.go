@@ -104,7 +104,7 @@ type methodMap map[string][]*MethodSpec
 
 // ProcessSource parses the app's controllers directory and return a list of
 // the controller types found. Returns a CompileError if the parsing fails.
-func ProcessSource(path string) (*SourceInfo, error) {
+func ProcessSource(path string, verbose bool) (*SourceInfo, error) {
 	// Parse files within the path.
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, path, func(f os.FileInfo) bool {
@@ -126,7 +126,7 @@ func ProcessSource(path string) (*SourceInfo, error) {
 		pkg = v
 	}
 
-	return processPackage(fset, pkg.Name, path, pkg), nil
+	return processPackage(fset, pkg.Name, path, pkg, verbose), nil
 }
 
 // ProcessFile created a SourceInfo data structure similarly to ProcessSource,
@@ -137,10 +137,10 @@ func ProcessFile(fset *token.FileSet, fileName string, file *ast.File) *SourceIn
 		Files: map[string]*ast.File{fileName: file},
 	}
 
-	return processPackage(fset, file.Name.Name, filepath.Dir(fileName), pkg)
+	return processPackage(fset, file.Name.Name, filepath.Dir(fileName), pkg, false)
 }
 
-func processPackage(fset *token.FileSet, pkgImportPath, pkgPath string, pkg *ast.Package) *SourceInfo {
+func processPackage(fset *token.FileSet, pkgImportPath, pkgPath string, pkg *ast.Package, verbose bool) *SourceInfo {
 	var (
 		structSpecs     []*TypeInfo
 		initImportPaths []string
@@ -149,14 +149,17 @@ func processPackage(fset *token.FileSet, pkgImportPath, pkgPath string, pkg *ast
 	)
 
 	// For each source file in the package...
-	for _, file := range getSortedFiles(pkg) {
+	for _, fInfo := range getSortedFiles(pkg) {
+		if verbose {
+			fmt.Println(fInfo.Filename)
+		}
 
 		// Imports maps the package key to the full import path.
 		// e.g. import "sample/app/models" => "models": "sample/app/models"
 		imports := map[string]string{}
 
 		// For each declaration in the source file...
-		for _, decl := range file.Decls {
+		for _, decl := range fInfo.File.Decls {
 			addImports(imports, decl, pkgPath)
 
 			// Match and add both structs and methods
@@ -193,6 +196,9 @@ func getFuncName(funcDecl *ast.FuncDecl) string {
 	return prefix + funcDecl.Name.Name
 }
 
+// full path --> package name
+var importsCache = map[string]string{}
+
 func addImports(imports map[string]string, decl ast.Decl, srcDir string) {
 	genDecl, ok := decl.(*ast.GenDecl)
 	if !ok {
@@ -215,32 +221,46 @@ func addImports(imports map[string]string, decl ast.Decl, srcDir string) {
 		quotedPath := importSpec.Path.Value           // e.g. "\"sample/app/models\""
 		fullPath := quotedPath[1 : len(quotedPath)-1] // Remove the quotes
 
-		// If the package was not aliased (common case), we have to import it
-		// to see what the package name is.
-		// TODO: Can improve performance here a lot:
-		// 1. Do not import everything over and over again.  Keep a cache.
-		// 2. Exempt the standard library; their directories always match the package name.
-		// 3. Can use build.FindOnly and then use parser.ParseDir with mode PackageClauseOnly
-		if pkgAlias == "" {
-			if fullPath == mars.MarsImportPath {
-				// Don't expect Mars to be resolvable during code generation …
-				imports["mars"] = mars.MarsImportPath
-				continue
-			}
-
-			pkg, err := build.Import(fullPath, srcDir, 0)
-			if err != nil {
-				// We expect this to happen for apps using reverse routing (since we
-				// have not yet generated the routes).  Don't log that.
-				if !strings.HasSuffix(fullPath, "/app/routes") {
-					mars.TRACE.Println("Could not find import:", fullPath)
-				}
-				continue
-			}
-			pkgAlias = pkg.Name
+		if pkgAlias != "" {
+			imports[pkgAlias] = fullPath
+			continue
 		}
 
+		if n, ok := importsCache[fullPath]; ok {
+			imports[n] = fullPath
+			continue
+		}
+
+		if !strings.Contains(fullPath, ".") {
+			// go standard library packages ==> package will always match directory name
+			imports[fullPath[strings.Index(fullPath, "/")+1:]] = fullPath
+			continue
+		}
+
+		if fullPath == mars.MarsImportPath {
+			// Don't expect Mars to be resolvable during code generation …
+			imports["mars"] = mars.MarsImportPath
+			continue
+		}
+
+		// If the package was not aliased (common case) and is not part of the standard library,
+		// we need to import it to figure out what the package name is.
+		// TODO: We can improve performance here a bit:
+		//       Use build.FindOnly and then use parser.ParseDir with mode PackageClauseOnly
+		pkg, err := build.Import(fullPath, srcDir, 0)
+		if err != nil {
+			// We expect this to happen for apps using reverse routing (since we
+			// have not yet generated the routes).  Don't log that.
+			if !strings.HasSuffix(fullPath, "/app/routes") {
+				mars.TRACE.Println("Could not find import:", fullPath)
+			}
+			continue
+		}
+		pkgAlias = pkg.Name
 		imports[pkgAlias] = fullPath
+
+		// ok, spare us the search next time
+		importsCache[fullPath] = pkgAlias
 	}
 }
 
@@ -521,12 +541,11 @@ func (s *SourceInfo) CalcImportAliases() map[string]string {
 }
 
 func addAlias(aliases map[string]string, importPath, pkgName string) {
-	alias, ok := aliases[importPath]
-	if ok {
+	if _, ok := aliases[importPath]; ok {
 		return
 	}
-	alias = makePackageAlias(aliases, pkgName)
-	aliases[importPath] = alias
+
+	aliases[importPath] = makePackageAlias(aliases, pkgName)
 }
 
 func makePackageAlias(aliases map[string]string, pkgName string) string {
@@ -577,24 +596,24 @@ func NewTypeExpr(pkgName string, expr ast.Expr) TypeExpr {
 }
 
 var builtinTypes = map[string]struct{}{
-	"bool":       struct{}{},
-	"byte":       struct{}{},
-	"complex128": struct{}{},
-	"complex64":  struct{}{},
-	"error":      struct{}{},
-	"float32":    struct{}{},
-	"float64":    struct{}{},
-	"int":        struct{}{},
-	"int16":      struct{}{},
-	"int32":      struct{}{},
-	"int64":      struct{}{},
-	"int8":       struct{}{},
-	"rune":       struct{}{},
-	"string":     struct{}{},
-	"uint":       struct{}{},
-	"uint16":     struct{}{},
-	"uint32":     struct{}{},
-	"uint64":     struct{}{},
-	"uint8":      struct{}{},
-	"uintptr":    struct{}{},
+	"bool":       {},
+	"byte":       {},
+	"complex128": {},
+	"complex64":  {},
+	"error":      {},
+	"float32":    {},
+	"float64":    {},
+	"int":        {},
+	"int16":      {},
+	"int32":      {},
+	"int64":      {},
+	"int8":       {},
+	"rune":       {},
+	"string":     {},
+	"uint":       {},
+	"uint16":     {},
+	"uint32":     {},
+	"uint64":     {},
+	"uint8":      {},
+	"uintptr":    {},
 }

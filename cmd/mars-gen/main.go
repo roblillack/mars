@@ -19,8 +19,15 @@ func fatalf(layout string, args ...interface{}) {
 
 func main() {
 	app := cli.NewApp()
+	app.HideVersion = true
 	app.Name = "mars-gen"
 	app.Usage = "Code generation tool for the Mars web framework"
+	app.Flags = []cli.Flag{
+		cli.BoolFlag{
+			Name:  "verbose, v",
+			Usage: "Prints the names of the source files as they are parsed",
+		},
+	}
 	app.Commands = []cli.Command{
 		{
 			Name:   "register-controllers",
@@ -67,7 +74,7 @@ func registerControllers(ctx *cli.Context) {
 		dir = ctx.Args()[0]
 	}
 
-	sourceInfo, procErr := ProcessSource(dir)
+	sourceInfo, procErr := ProcessSource(dir, ctx.GlobalBool("v"))
 	if procErr != nil {
 		fatalf(procErr.Error())
 	}
@@ -87,7 +94,7 @@ func reverseRoutes(ctx *cli.Context) {
 		dir = ctx.Args()[0]
 	}
 
-	sourceInfo, procErr := ProcessSource(dir)
+	sourceInfo, procErr := ProcessSource(dir, ctx.GlobalBool("v"))
 	if procErr != nil {
 		fatalf(procErr.Error())
 	}
@@ -103,16 +110,18 @@ func reverseRoutes(ctx *cli.Context) {
 func generateSources(tpl, filename string, templateArgs map[string]interface{}) {
 	sourceCode := mars.ExecuteTemplate(template.Must(template.New("").Parse(tpl)), templateArgs)
 
-	os.MkdirAll(path.Dir(filename), 0755)
+	if err := os.MkdirAll(path.Dir(filename), 0755); err != nil {
+		fatalf("Unable to create dir: %v", err)
+	}
 
 	// Create the file
 	file, err := os.Create(filename)
-	defer file.Close()
 	if err != nil {
 		fatalf("Failed to create file: %v", err)
 	}
-	_, err = file.WriteString(sourceCode)
-	if err != nil {
+	defer file.Close()
+
+	if _, err := file.WriteString(sourceCode); err != nil {
 		fatalf("Failed to write to file: %v", err)
 	}
 }
