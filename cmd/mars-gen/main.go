@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"go/format"
 	"os"
@@ -9,8 +10,6 @@ import (
 	"time"
 
 	"github.com/codegangsta/cli"
-
-	"github.com/roblillack/mars"
 )
 
 func fatalf(layout string, args ...interface{}) {
@@ -109,7 +108,12 @@ func reverseRoutes(ctx *cli.Context) {
 }
 
 func generateSources(tpl, filename string, templateArgs map[string]interface{}) {
-	sourceCode := mars.ExecuteTemplate(template.Must(template.New("").Parse(tpl)), templateArgs)
+	var b bytes.Buffer
+
+	tmpl := template.Must(template.New("").Parse(tpl))
+	if err := tmpl.Execute(&b, templateArgs); err != nil {
+		fatalf("Unable to create source file: %v", err)
+	}
 
 	if err := os.MkdirAll(path.Dir(filename), 0755); err != nil {
 		fatalf("Unable to create dir: %v", err)
@@ -122,7 +126,7 @@ func generateSources(tpl, filename string, templateArgs map[string]interface{}) 
 	}
 	defer file.Close()
 
-	formatted, err := format.Source([]byte(sourceCode))
+	formatted, err := format.Source(b.Bytes())
 	if err != nil {
 		fatalf("Failed to format file: %v", err)
 	}

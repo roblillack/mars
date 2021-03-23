@@ -12,12 +12,14 @@ import (
 	"time"
 
 	"golang.org/x/net/websocket"
+
+	"github.com/roblillack/mars/internal/watcher"
 )
 
 var (
 	MainRouter         *Router
 	MainTemplateLoader *TemplateLoader
-	MainWatcher        *Watcher
+	MainWatcher        *watcher.Watcher
 	Server             *http.Server
 	SecureServer       *http.Server
 )

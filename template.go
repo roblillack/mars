@@ -223,7 +223,7 @@ func (loader *TemplateLoader) createEmptyTemplateSet() *Error {
 // This scans the views directory and parses all templates as Go Templates.
 // If a template fails to parse, the error is set on the loader.
 // (It's awkward to refresh a single Go Template)
-func (loader *TemplateLoader) Refresh() *Error {
+func (loader *TemplateLoader) Refresh() error {
 	TRACE.Printf("Refreshing templates from %s", loader.paths)
 
 	loader.compileError = nil
@@ -357,7 +357,11 @@ func (loader *TemplateLoader) Refresh() *Error {
 		// If there was an error with the Funcs, set it and return immediately.
 		if funcErr != nil {
 			loader.compileError = funcErr.(*Error)
-			return loader.compileError
+			if loader.compileError == nil {
+				return nil
+			} else {
+				return loader.compileError
+			}
 		}
 	}
 
@@ -379,7 +383,11 @@ func (loader *TemplateLoader) Refresh() *Error {
 		}
 	}
 
-	return loader.compileError
+	if loader.compileError == nil {
+		return nil
+	} else {
+		return loader.compileError
+	}
 }
 
 func (loader *TemplateLoader) WatchDir(info os.FileInfo) bool {

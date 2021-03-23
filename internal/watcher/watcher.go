@@ -1,6 +1,7 @@
-package mars
+package watcher
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -14,39 +15,31 @@ import (
 type Listener interface {
 	// Refresh is invoked by the watcher on relevant filesystem events.
 	// If the listener returns an error, it is served to the user on the current request.
-	Refresh() *Error
-}
-
-// DiscerningListener allows the receiver to selectively watch files.
-type DiscerningListener interface {
-	Listener
-	WatchDir(info os.FileInfo) bool
-	WatchFile(basename string) bool
+	Refresh() error
 }
 
 // Watcher allows listeners to register to be notified of changes under a given
 // directory.
 type Watcher struct {
 	// Parallel arrays of watcher/listener pairs.
-	watchers     []*fsnotify.Watcher
-	listeners    []Listener
-	forceRefresh bool
-	lastError    int
-	notifyMutex  sync.Mutex
+	watchers    []*fsnotify.Watcher
+	listeners   []Listener
+	lastError   int
+	notifyMutex sync.Mutex
 }
 
-func NewWatcher() *Watcher {
+func New() *Watcher {
 	return &Watcher{
-		forceRefresh: true,
-		lastError:    -1,
+		// forceRefresh: true,
+		lastError: -1,
 	}
 }
 
 // Listen registers for events within the given root directories (recursively).
-func (w *Watcher) Listen(listener Listener, roots ...string) {
+func (w *Watcher) Listen(listener Listener, roots ...string) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		ERROR.Fatal(err)
+		return err
 	}
 
 	// Replace the unbuffered Event channel with a buffered one.
@@ -70,15 +63,14 @@ func (w *Watcher) Listen(listener Listener, roots ...string) {
 
 		fi, err := os.Stat(p)
 		if err != nil {
-			ERROR.Println("Failed to stat watched path", p, ":", err)
-			continue
+			return fmt.Errorf("Failed to stat watched path %s: %w", p, err)
 		}
 
 		// If it is a file, watch that specific file.
 		if !fi.IsDir() {
 			err = watcher.Add(p)
 			if err != nil {
-				ERROR.Println("Failed to watch", p, ":", err)
+				return fmt.Errorf("Failed to watch %s: %w", p, err)
 			}
 			continue
 		}
@@ -87,93 +79,67 @@ func (w *Watcher) Listen(listener Listener, roots ...string) {
 
 		watcherWalker = func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				ERROR.Println("Error walking path:", err)
-				return nil
+				return err
 			}
 
 			// is it a symlinked template?
 			link, err := os.Lstat(path)
 			if err == nil && link.Mode()&os.ModeSymlink == os.ModeSymlink {
-				TRACE.Println("Watcher symlink: ", path)
 				// lookup the actual target & check for goodness
 				targetPath, err := filepath.EvalSymlinks(path)
 				if err != nil {
-					ERROR.Println("Failed to read symlink", err)
-					return err
+					return fmt.Errorf("failed to read symlink %s: %w", path, err)
 				}
 				targetInfo, err := os.Stat(targetPath)
 				if err != nil {
-					ERROR.Println("Failed to stat symlink target", err)
-					return err
+					return fmt.Errorf("failed to stat symlink target %s of %s: %w", targetPath, path, err)
 				}
 
 				// set the template path to the target of the symlink
 				path = targetPath
 				info = targetInfo
-				filepath.Walk(path, watcherWalker)
+				if err := filepath.Walk(path, watcherWalker); err != nil {
+					return err
+				}
 			}
 
 			if info.IsDir() {
-				if dl, ok := listener.(DiscerningListener); ok {
-					if !dl.WatchDir(info) {
-						return filepath.SkipDir
-					}
-				}
-
-				err = watcher.Add(path)
-				if err != nil {
-					ERROR.Println("Failed to watch", path, ":", err)
+				if err := watcher.Add(path); err != nil {
+					return err
 				}
 			}
 			return nil
 		}
 
 		// Else, walk the directory tree.
-		filepath.Walk(p, watcherWalker)
-	}
-
-	if w.eagerRebuildEnabled() {
-		// Create goroutine to notify file changes in real time
-		go w.NotifyWhenUpdated(listener, watcher)
+		if err := filepath.Walk(p, watcherWalker); err != nil {
+			return fmt.Errorf("error walking path %s: %w", p, err)
+		}
 	}
 
 	w.watchers = append(w.watchers, watcher)
 	w.listeners = append(w.listeners, listener)
-}
 
-// NotifyWhenUpdated notifies the watcher when a file event is received.
-func (w *Watcher) NotifyWhenUpdated(listener Listener, watcher *fsnotify.Watcher) {
-	for {
-		select {
-		case ev := <-watcher.Events:
-			if w.rebuildRequired(ev, listener) {
-				// Serialize listener.Refresh() calls.
-				w.notifyMutex.Lock()
-				listener.Refresh()
-				w.notifyMutex.Unlock()
-			}
-		case <-watcher.Errors:
-			continue
-		}
-	}
+	return nil
 }
 
 // Notify causes the watcher to forward any change events to listeners.
 // It returns the first (if any) error returned.
-func (w *Watcher) Notify() *Error {
+func (w *Watcher) Notify() error {
 	// Serialize Notify() calls.
 	w.notifyMutex.Lock()
 	defer w.notifyMutex.Unlock()
 
-	for i, watcher := range w.watchers {
-		listener := w.listeners[i]
+	for idx, watcher := range w.watchers {
+		listener := w.listeners[idx]
 
 		// Pull all pending events / errors from the watcher.
 		refresh := false
 		for {
 			select {
 			case ev := <-watcher.Events:
-				if w.rebuildRequired(ev, listener) {
+				// Ignore changes to dotfiles.
+				if !strings.HasPrefix(path.Base(ev.Name), ".") {
 					refresh = true
 				}
 				continue
@@ -185,50 +151,15 @@ func (w *Watcher) Notify() *Error {
 			break
 		}
 
-		if w.forceRefresh || refresh || w.lastError == i {
+		if refresh || w.lastError == idx {
 			err := listener.Refresh()
 			if err != nil {
-				w.lastError = i
+				w.lastError = idx
 				return err
 			}
 		}
 	}
 
-	w.forceRefresh = false
 	w.lastError = -1
 	return nil
-}
-
-// If watcher.mode is set to eager, the application is rebuilt immediately
-// when a source file is changed.
-// This feature is available only in dev mode.
-func (w *Watcher) eagerRebuildEnabled() bool {
-	return Config.BoolDefault("mode.dev", true) &&
-		Config.BoolDefault("watch", true) &&
-		Config.StringDefault("watcher.mode", "normal") == "eager"
-}
-
-func (w *Watcher) rebuildRequired(ev fsnotify.Event, listener Listener) bool {
-	// Ignore changes to dotfiles.
-	if strings.HasPrefix(path.Base(ev.Name), ".") {
-		return false
-	}
-
-	if dl, ok := listener.(DiscerningListener); ok {
-		if !dl.WatchFile(ev.Name) || ev.Op&fsnotify.Chmod == fsnotify.Chmod {
-			return false
-		}
-	}
-	return true
-}
-
-var WatchFilter = func(c *Controller, fc []Filter) {
-	if MainWatcher != nil {
-		err := MainWatcher.Notify()
-		if err != nil {
-			c.Result = c.RenderError(err)
-			return
-		}
-	}
-	fc[0](c, fc[1:])
 }
