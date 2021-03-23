@@ -16,18 +16,18 @@ type Static struct {
 func init() {
 	RegisterController((*Static)(nil),
 		[]*MethodType{
-			&MethodType{
+			{
 				Name: "ServeFresh",
 				Args: []*MethodArg{
-					&MethodArg{Name: "prefix", Type: reflect.TypeOf((*string)(nil))},
-					&MethodArg{Name: "filepath", Type: reflect.TypeOf((*string)(nil))},
+					{Name: "prefix", Type: reflect.TypeOf((*string)(nil))},
+					{Name: "filepath", Type: reflect.TypeOf((*string)(nil))},
 				},
 			},
-			&MethodType{
+			{
 				Name: "Serve",
 				Args: []*MethodArg{
-					&MethodArg{Name: "prefix", Type: reflect.TypeOf((*string)(nil))},
-					&MethodArg{Name: "filepath", Type: reflect.TypeOf((*string)(nil))},
+					{Name: "prefix", Type: reflect.TypeOf((*string)(nil))},
+					{Name: "filepath", Type: reflect.TypeOf((*string)(nil))},
 				},
 			},
 		},
