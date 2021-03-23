@@ -12,42 +12,42 @@ import (
 // Data-driven tests that check that a given routes-file line translates into
 // the expected Route object.
 var routeTestCases = map[string]*Route{
-	"get / Application.Index": &Route{
+	"get / Application.Index": {
 		Method:      "GET",
 		Path:        "/",
 		Action:      "Application.Index",
 		FixedParams: []string{},
 	},
 
-	"post /app/:id Application.SaveApp": &Route{
+	"post /app/:id Application.SaveApp": {
 		Method:      "POST",
 		Path:        "/app/:id",
 		Action:      "Application.SaveApp",
 		FixedParams: []string{},
 	},
 
-	"get /app/ Application.List": &Route{
+	"get /app/ Application.List": {
 		Method:      "GET",
 		Path:        "/app/",
 		Action:      "Application.List",
 		FixedParams: []string{},
 	},
 
-	`get /app/:appId/ Application.Show`: &Route{
+	`get /app/:appId/ Application.Show`: {
 		Method:      "GET",
 		Path:        `/app/:appId/`,
 		Action:      "Application.Show",
 		FixedParams: []string{},
 	},
 
-	`get /app-wild/*appId/ Application.WildShow`: &Route{
+	`get /app-wild/*appId/ Application.WildShow`: {
 		Method:      "GET",
 		Path:        `/app-wild/*appId/`,
 		Action:      "Application.WildShow",
 		FixedParams: []string{},
 	},
 
-	`GET /public/:filepath   Static.Serve("public")`: &Route{
+	`GET /public/:filepath   Static.Serve("public")`: {
 		Method: "GET",
 		Path:   "/public/:filepath",
 		Action: "Static.Serve",
@@ -56,7 +56,7 @@ var routeTestCases = map[string]*Route{
 		},
 	},
 
-	`GET /javascript/:filepath Static.Serve("public/js")`: &Route{
+	`GET /javascript/:filepath Static.Serve("public/js")`: {
 		Method: "GET",
 		Path:   "/javascript/:filepath",
 		Action: "Static.Serve",
@@ -65,28 +65,28 @@ var routeTestCases = map[string]*Route{
 		},
 	},
 
-	"GET /files/:id.:extension Application.DownloadFile": &Route{
+	"GET /files/:id.:extension Application.DownloadFile": {
 		Method:      "GET",
 		Path:        "/files/:id.:extension",
 		Action:      "Application.DownloadFile",
 		FixedParams: []string{},
 	},
 
-	"* /apps/:id/:action Application.:action": &Route{
+	"* /apps/:id/:action Application.:action": {
 		Method:      "*",
 		Path:        "/apps/:id/:action",
 		Action:      "Application.:action",
 		FixedParams: []string{},
 	},
 
-	"* /:controller/:action :controller.:action": &Route{
+	"* /:controller/:action :controller.:action": {
 		Method:      "*",
 		Path:        "/:controller/:action",
 		Action:      ":controller.:action",
 		FixedParams: []string{},
 	},
 
-	`GET / Application.Index("Test", "Test2")`: &Route{
+	`GET / Application.Index("Test", "Test2")`: {
 		Method: "GET",
 		Path:   "/",
 		Action: "Application.Index",
@@ -135,110 +135,110 @@ GET   /favicon.ico               404
 `
 
 var routeMatchTestCases = map[*http.Request]*RouteMatch{
-	&http.Request{
+	{
 		Method: "GET",
 		URL:    &url.URL{Path: "/"},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Application",
 		MethodName:     "Index",
 		FixedParams:    []string{},
 		Params:         map[string][]string{},
 	},
 
-	&http.Request{
+	{
 		Method: "GET",
 		URL:    &url.URL{Path: "/test/"},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Application",
 		MethodName:     "Index",
 		FixedParams:    []string{"Test", "Test2"},
 		Params:         map[string][]string{},
 	},
 
-	&http.Request{
+	{
 		Method: "GET",
 		URL:    &url.URL{Path: "/app/123"},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Application",
 		MethodName:     "Show",
 		FixedParams:    []string{},
 		Params:         map[string][]string{"id": {"123"}},
 	},
 
-	&http.Request{
+	{
 		Method: "GET",
 		URL:    &url.URL{Path: "/app/123.png"},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Application",
 		MethodName:     "ShowImage",
 		FixedParams:    []string{},
 		Params:         map[string][]string{"id": {"123"}},
 	},
 
-	&http.Request{
+	{
 		Method: "GET",
 		URL:    &url.URL{Path: "/app/123.jpg"},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Application",
 		MethodName:     "ShowImageCustomExtension",
 		FixedParams:    []string{},
 		Params:         map[string][]string{"id": {"123"}, "ext": {"jpg"}},
 	},
 
-	&http.Request{
+	{
 		Method: "PATCH",
 		URL:    &url.URL{Path: "/app/123"},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Application",
 		MethodName:     "Update",
 		FixedParams:    []string{},
 		Params:         map[string][]string{"id": {"123"}},
 	},
 
-	&http.Request{
+	{
 		Method: "POST",
 		URL:    &url.URL{Path: "/app/123"},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Application",
 		MethodName:     "Save",
 		FixedParams:    []string{},
 		Params:         map[string][]string{"id": {"123"}},
 	},
 
-	&http.Request{
+	{
 		Method: "GET",
 		URL:    &url.URL{Path: "/app/123/"},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Application",
 		MethodName:     "Show",
 		FixedParams:    []string{},
 		Params:         map[string][]string{"id": {"123"}},
 	},
 
-	&http.Request{
+	{
 		Method: "GET",
 		URL:    &url.URL{Path: "/public/css/style.css"},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Static",
 		MethodName:     "Serve",
 		FixedParams:    []string{"public"},
 		Params:         map[string][]string{"filepath": {"css/style.css"}},
 	},
 
-	&http.Request{
+	{
 		Method: "GET",
 		URL:    &url.URL{Path: "/javascript/sessvars.js"},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Static",
 		MethodName:     "Serve",
 		FixedParams:    []string{"public/js"},
 		Params:         map[string][]string{"filepath": {"sessvars.js"}},
 	},
 
-	&http.Request{
+	{
 		Method: "GET",
 		URL:    &url.URL{Path: "/Implicit/Route"},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Implicit",
 		MethodName:     "Route",
 		FixedParams:    []string{},
@@ -249,10 +249,10 @@ var routeMatchTestCases = map[*http.Request]*RouteMatch{
 		},
 	},
 
-	&http.Request{
+	{
 		Method: "GET",
 		URL:    &url.URL{Path: "/favicon.ico"},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "",
 		MethodName:     "",
 		Action:         "404",
@@ -260,22 +260,22 @@ var routeMatchTestCases = map[*http.Request]*RouteMatch{
 		Params:         map[string][]string{},
 	},
 
-	&http.Request{
+	{
 		Method: "POST",
 		URL:    &url.URL{Path: "/app/123"},
 		Header: http.Header{"X-Http-Method-Override": []string{"PATCH"}},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Application",
 		MethodName:     "Update",
 		FixedParams:    []string{},
 		Params:         map[string][]string{"id": {"123"}},
 	},
 
-	&http.Request{
+	{
 		Method: "GET",
 		URL:    &url.URL{Path: "/app/123"},
 		Header: http.Header{"X-Http-Method-Override": []string{"PATCH"}},
-	}: &RouteMatch{
+	}: {
 		ControllerName: "Application",
 		MethodName:     "Show",
 		FixedParams:    []string{},
@@ -333,100 +333,100 @@ type ReverseRouteArgs struct {
 }
 
 var reverseRoutingTestCases = map[*ReverseRouteArgs]*ActionDefinition{
-	&ReverseRouteArgs{
+	{
 		action: "Application.Index",
 		args:   map[string]string{},
-	}: &ActionDefinition{
+	}: {
 		Url:    "/",
 		Method: "GET",
 		Star:   false,
 		Action: "Application.Index",
 	},
 
-	&ReverseRouteArgs{
+	{
 		action: "Application.ShowImage",
 		args:   map[string]string{"id": "123"},
-	}: &ActionDefinition{
+	}: {
 		Url:    "/app/123.png",
 		Method: "GET",
 		Star:   false,
 		Action: "Application.ShowImage",
 	},
 
-	&ReverseRouteArgs{
+	{
 		action: "Application.Show",
 		args:   map[string]string{"id": "123"},
-	}: &ActionDefinition{
+	}: {
 		Url:    "/app/123/",
 		Method: "GET",
 		Star:   false,
 		Action: "Application.Show",
 	},
 
-	&ReverseRouteArgs{
+	{
 		action: "Implicit.Route",
 		args:   map[string]string{},
-	}: &ActionDefinition{
+	}: {
 		Url:    "/Implicit/Route",
 		Method: "GET",
 		Star:   true,
 		Action: "Implicit.Route",
 	},
 
-	&ReverseRouteArgs{
+	{
 		action: "Application.Save",
 		args:   map[string]string{"id": "123", "c": "http://continue"},
-	}: &ActionDefinition{
+	}: {
 		Url:    "/app/123?c=http%3A%2F%2Fcontinue",
 		Method: "POST",
 		Star:   false,
 		Action: "Application.Save",
 	},
 
-	&ReverseRouteArgs{
+	{
 		action: "Application.WildShow",
 		args:   map[string]string{"id": "123"},
-	}: &ActionDefinition{
+	}: {
 		Url:    "/app-wild/123/",
 		Method: "GET",
 		Star:   false,
 		Action: "Application.WildShow",
 	},
 
-	&ReverseRouteArgs{
+	{
 		action: "Application.WildShow",
 		args:   map[string]string{"id": "100% organic"},
-	}: &ActionDefinition{
+	}: {
 		Url:    "/app-wild/100%25%20organic/",
 		Method: "GET",
 		Star:   false,
 		Action: "Application.WildShow",
 	},
 
-	&ReverseRouteArgs{
+	{
 		action: "Application.Show",
 		args:   map[string]string{"id": "100% organic"},
-	}: &ActionDefinition{
+	}: {
 		Url:    "/app/100%25%20organic/",
 		Method: "GET",
 		Star:   false,
 		Action: "Application.Show",
 	},
 
-	&ReverseRouteArgs{
+	{
 		action: "Application.WildShow",
 		args:   map[string]string{"id": "folder/subfolder"},
-	}: &ActionDefinition{
+	}: {
 		Url:    "/app-wild/folder/subfolder/",
 		Method: "GET",
 		Star:   false,
 		Action: "Application.WildShow",
 	},
 
-	&ReverseRouteArgs{
+	{
 		action: "Application.Show",
 		args:   map[string]string{"id": "folder/subfolder"},
-	}: &ActionDefinition{
+	}: {
 		Url:    "/app/folder%2Fsubfolder/",
 		Method: "GET",
 		Star:   false,
@@ -455,7 +455,7 @@ func BenchmarkRouter(b *testing.B) {
 	router.updateTree()
 	b.ResetTimer()
 	for i := 0; i < b.N/len(routeMatchTestCases); i++ {
-		for req, _ := range routeMatchTestCases {
+		for req := range routeMatchTestCases {
 			r := router.Route(req)
 			if r == nil {
 				b.Errorf("Request not found: %s", req.URL.Path)

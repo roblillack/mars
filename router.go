@@ -33,12 +33,6 @@ type RouteMatch struct {
 	Params         map[string][]string // e.g. {id: 123}
 }
 
-type arg struct {
-	name       string
-	index      int
-	constraint *regexp.Regexp
-}
-
 // Prepares the route to be used in matching.
 func NewRoute(method, path, action, fixedArgs, routesPath string, line int) (r *Route) {
 
@@ -144,17 +138,23 @@ func (router *Router) Route(req *http.Request) *RouteMatch {
 
 // Refresh re-reads the routes file and re-calculates the routing table.
 // Returns an error if a specified action could not be found.
-func (router *Router) Refresh() (err *Error) {
-	router.Routes, err = parseRoutesFile(router.path, "", true)
-	if err != nil {
-		return
+func (router *Router) Refresh() error {
+	if r, err := parseRoutesFile(router.path, "", true); err != nil {
+		return err
+	} else {
+		router.Routes = r
 	}
-	err = router.updateTree()
-	return
+
+	if err := router.updateTree(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (router *Router) updateTree() *Error {
 	router.Tree = pathtree.New()
+
 	for _, route := range router.Routes {
 		err := router.Tree.Add(route.TreePath(), route)
 
@@ -168,6 +168,7 @@ func (router *Router) updateTree() *Error {
 			return routeError(err, route.routesPath, "", route.line)
 		}
 	}
+
 	return nil
 }
 
@@ -180,6 +181,7 @@ func parseRoutesFile(routesPath, joinedPath string, validate bool) ([]*Route, *E
 			Description: err.Error(),
 		}
 	}
+
 	return parseRoutes(routesPath, joinedPath, string(contentBytes), validate)
 }
 

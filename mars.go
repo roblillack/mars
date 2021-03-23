@@ -13,6 +13,8 @@ import (
 
 	"github.com/agtorre/gocolorize"
 	"github.com/robfig/config"
+
+	"github.com/roblillack/mars/internal/watcher"
 )
 
 const (
@@ -219,7 +221,7 @@ func setup() {
 	// The "watch" config variable can turn on and off all watching.
 	// (As a convenient way to control it all together.)
 	if Config.BoolDefault("watch", DevMode) {
-		MainWatcher = NewWatcher()
+		mainWatcher = watcher.New()
 		Filters = append([]Filter{WatchFilter}, Filters...)
 	}
 
@@ -247,13 +249,15 @@ func initializeFallbacks() {
 func SetupViews() {
 	MainTemplateLoader = NewTemplateLoader([]string{path.Join(BasePath, ViewsPath)})
 	if err := MainTemplateLoader.Refresh(); err != nil {
-		ERROR.Fatalln(err.Error())
+		ERROR.Fatalln(err)
 	}
 
 	// If desired (or by default), create a watcher for templates and routes.
 	// The watcher calls Refresh() on things on the first request.
-	if MainWatcher != nil && Config.BoolDefault("watch.templates", true) {
-		MainWatcher.Listen(MainTemplateLoader, MainTemplateLoader.paths...)
+	if mainWatcher != nil && Config.BoolDefault("watch.templates", true) {
+		if err := mainWatcher.Listen(MainTemplateLoader, MainTemplateLoader.paths...); err != nil {
+			ERROR.Fatalln(err)
+		}
 	}
 }
 
@@ -263,13 +267,15 @@ func SetupViews() {
 func SetupRouter() {
 	MainRouter = NewRouter(filepath.Join(BasePath, RoutesFile))
 	if err := MainRouter.Refresh(); err != nil {
-		ERROR.Fatalln(err.Error())
+		ERROR.Fatalln(err)
 	}
 
 	// If desired (or by default), create a watcher for templates and routes.
 	// The watcher calls Refresh() on things on the first request.
-	if MainWatcher != nil && Config.BoolDefault("watch.routes", true) {
-		MainWatcher.Listen(MainRouter, MainRouter.path)
+	if mainWatcher != nil && Config.BoolDefault("watch.routes", true) {
+		if err := mainWatcher.Listen(MainRouter, MainRouter.path); err != nil {
+			ERROR.Fatalln(err)
+		}
 	}
 }
 

@@ -1,6 +1,6 @@
 module github.com/roblillack/mars
 
-go 1.12
+go 1.13
 
 require (
 	github.com/agtorre/gocolorize v1.0.0

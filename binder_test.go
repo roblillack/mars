@@ -274,18 +274,18 @@ var unbinderTestCases = map[string]interface{}{
 // Some of the unbinding results are not exactly what is in PARAMS, since it
 // serializes implicit zero values explicitly.
 var unbinderOverrideAnswers = map[string]map[string]string{
-	"arr": map[string]string{
+	"arr": {
 		"arr[0]": "1",
 		"arr[1]": "2",
 		"arr[2]": "0",
 		"arr[3]": "3",
 	},
-	"A": map[string]string{
+	"A": {
 		"A.ID":      "123",
 		"A.Name":    "rob",
 		"A.B.Extra": "",
 	},
-	"arrC": map[string]string{
+	"arrC": {
 		"arrC[0].ID":      "5",
 		"arrC[0].Name":    "rob",
 		"arrC[0].B.Extra": "foo",
@@ -293,9 +293,9 @@ var unbinderOverrideAnswers = map[string]map[string]string{
 		"arrC[1].Name":    "bill",
 		"arrC[1].B.Extra": "",
 	},
-	"m":  map[string]string{"m[a]": "foo", "m[b]": "bar"},
-	"m2": map[string]string{"m2[1]": "foo", "m2[2]": "bar"},
-	"m3": map[string]string{"m3[a]": "1", "m3[b]": "2"},
+	"m":  {"m[a]": "foo", "m[b]": "bar"},
+	"m2": {"m2[1]": "foo", "m2[2]": "bar"},
+	"m3": {"m3[a]": "1", "m3[b]": "2"},
 }
 
 func TestUnbinder(t *testing.T) {

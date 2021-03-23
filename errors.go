@@ -17,6 +17,8 @@ type Error struct {
 	Link                     string   // A configurable link to wrap the error source in
 }
 
+var _ error = &Error{}
+
 // An object to hold the per-source-line details.
 type sourceLine struct {
 	Source  string
@@ -27,6 +29,10 @@ type sourceLine struct {
 // Construct a plaintext version of the error, taking account that fields are optionally set.
 // Returns e.g. Compilation Error (in views/header.html:51): expected right delim in end; got "}"
 func (e *Error) Error() string {
+	if e == nil {
+		return "<nil>"
+	}
+
 	loc := ""
 	if e.Path != "" {
 		line := ""

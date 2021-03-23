@@ -5,26 +5,23 @@
 There is _no_ fixed directory hierarchy with Mars, but a projects' structure typically looks like this:
 
 ```
-- $GOPATH/src/myProject (Your project)
+- myProject (Your project)
   |
-  |-- main.go (Your main go code can live here)
+  |-- main.go (Your main go code might live here, but can also be in ./cmd/something)
   |
   |-- conf (Directory with configuration files which are needed at runtime)
   |    |
   |    |-- app.conf (main configuration file)
   |    |
-  |    |-- routes (Configuration of the routes)
+  |    +-- routes (Configuration of the routes)
   |
   |-- views (All the view templates are here)
   |    |
-  |    |-- hotel (main configuration file)
+  |    |-- hotel (view templates for the “Hotel” controller)
   |    |
-  |    |-- routes (Configuration of the routes)
+  |    +-- other (view templates for the “Other” controller)
   |
-  |-- mySubpackage (Your code is in arbitrary sub packages)
-  |    |
-  |    |-- foo.go
-  |
-  |-- vendor (Your vendored dependencies are here)
-       |-- ...
+  +-- mySubpackage (Your code is in arbitrary sub packages)
+       |
+       +-- foo.go
 ```

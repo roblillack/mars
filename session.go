@@ -125,7 +125,7 @@ func GetSessionFromCookie(cookie *http.Cookie) Session {
 		return session
 	}
 
-	ParseKeyValueCookie(data, func(key, val string) {
+	parseKeyValueCookie(data, func(key, val string) {
 		session[key] = val
 	})
 

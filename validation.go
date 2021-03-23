@@ -235,7 +235,7 @@ func restoreValidationErrors(req *http.Request) ([]*ValidationError, error) {
 		errors = make([]*ValidationError, 0, 5)
 	)
 	if cookie, err = req.Cookie(CookiePrefix + "_ERRORS"); err == nil {
-		ParseKeyValueCookie(cookie.Value, func(key, val string) {
+		parseKeyValueCookie(cookie.Value, func(key, val string) {
 			errors = append(errors, &ValidationError{
 				Key:     key,
 				Message: val,

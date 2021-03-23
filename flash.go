@@ -66,7 +66,7 @@ func restoreFlash(req *http.Request) Flash {
 		Out:  make(map[string]string),
 	}
 	if cookie, err := req.Cookie(CookiePrefix + "_FLASH"); err == nil {
-		ParseKeyValueCookie(cookie.Value, func(key, val string) {
+		parseKeyValueCookie(cookie.Value, func(key, val string) {
 			flash.Data[key] = val
 		})
 	}
