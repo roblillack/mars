@@ -31,11 +31,11 @@ func TestWatcher(t *testing.T) {
 
 	bla := &SimpleRefresher{}
 	if err := w.Listen(bla, tmp); err != nil {
-		t.Errorf("unable to setup listener: %w", err)
+		t.Errorf("unable to setup listener: %s", err)
 	}
 
 	if err := w.Notify(); err != nil {
-		t.Errorf("unable to notify listeners: %w", err)
+		t.Errorf("unable to notify listeners: %s", err)
 	}
 	if bla.Refreshed {
 		t.Error("No changes to tmp dir yet, should not have been refreshed.")
@@ -52,7 +52,7 @@ func TestWatcher(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	if err := w.Notify(); err != nil {
-		t.Errorf("unable to notify listeners: %w", err)
+		t.Errorf("unable to notify listeners: %s", err)
 	}
 	if !bla.Refreshed {
 		t.Error("Should have been refreshed.")
@@ -74,11 +74,11 @@ func TestErrorWhileRefreshing(t *testing.T) {
 
 	bla := &SimpleRefresher{Error: errors.New("uh-oh something went wrong!!!11")}
 	if err := w.Listen(bla, tmp); err != nil {
-		t.Errorf("unable to setup listener: %w", err)
+		t.Errorf("unable to setup listener: %s", err)
 	}
 
 	if err := w.Notify(); err != nil {
-		t.Errorf("unable to notify listeners: %w", err)
+		t.Errorf("unable to notify listeners: %s", err)
 	}
 	if bla.Refreshed {
 		t.Error("No changes to tmp dir yet, should not have been refreshed.")
@@ -108,7 +108,7 @@ func TestErrorWhileRefreshing(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	if err := w.Notify(); err != nil {
-		t.Errorf("error not resovled yet: %w", err)
+		t.Errorf("error not resovled yet: %s", err)
 	}
 	if !bla.Refreshed {
 		t.Error("Should have been refreshed.")
