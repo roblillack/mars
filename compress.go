@@ -28,7 +28,7 @@ var compressableMimes = [...]string{
 	"image/svg+xml",
 }
 
-type WriteFlusher interface {
+type writeFlusher interface {
 	io.Writer
 	io.Closer
 	Flush() error
@@ -36,7 +36,7 @@ type WriteFlusher interface {
 
 type CompressResponseWriter struct {
 	http.ResponseWriter
-	compressWriter  WriteFlusher
+	compressWriter  writeFlusher
 	compressionType string
 	headersWritten  bool
 	closeNotify     chan bool
