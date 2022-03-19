@@ -467,7 +467,7 @@ func (loader *TemplateLoader) Template(name string, funcMaps ...Args) (Template,
 		}
 	}
 
-	return GoTemplate{tmpl, loader, funcMap}, err
+	return goTemplateWrapper{tmpl, loader, funcMap}, err
 }
 
 // Reads the lines of the given file.
@@ -480,25 +480,27 @@ func readLines(filename string) ([]string, error) {
 }
 
 // Adapter for Go Templates.
-type GoTemplate struct {
+type goTemplateWrapper struct {
 	*template.Template
 	loader  *TemplateLoader
 	funcMap template.FuncMap
 }
 
 // return a 'mars.Template' from Go's template.
-func (gotmpl GoTemplate) Render(wr io.Writer, arg interface{}) error {
-	if gotmpl.funcMap == nil {
-		return gotmpl.Execute(wr, arg)
+func (t goTemplateWrapper) Render(wr io.Writer, arg interface{}) error {
+	if t.funcMap == nil {
+		return t.Template.Execute(wr, arg)
 	}
 
-	return gotmpl.Funcs(gotmpl.funcMap).Execute(wr, arg)
+	return t.Template.Funcs(t.funcMap).Execute(wr, arg)
 }
 
-func (gotmpl GoTemplate) Content() []string {
-	content, _ := readLines(gotmpl.loader.templatePaths[gotmpl.Name()])
+func (t goTemplateWrapper) Content() []string {
+	content, _ := readLines(t.loader.templatePaths[t.Template.Name()])
 	return content
 }
+
+var _ Template = goTemplateWrapper{}
 
 /////////////////////
 // Template functions
