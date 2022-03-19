@@ -2,8 +2,8 @@
 
 A lightweight web toolkit for the [Go language](http://www.golang.org).
 
-[![GoDoc](http://godoc.org/github.com/roblillack/mars?status.svg)](http://godoc.org/github.com/roblillack/mars)
-[![Build Status](https://travis-ci.com/roblillack/mars.svg?branch=master)](http://travis-ci.com/roblillack/mars)
+[![GoDoc](http://godoc.org/github.com/roblillack/mars?status.svg)](https://pkg.go.dev/github.com/roblillack/mars)
+[![Build Status](https://travis-ci.com/roblillack/mars.svg?branch=master)](https://travis-ci.com/github/roblillack/mars)
 [![Windows build status](https://ci.appveyor.com/api/projects/status/og951w3majhmd13t/branch/master?svg=true)](https://ci.appveyor.com/project/roblillack/mars/branch/master)
 [![Documentation Status](https://readthedocs.org/projects/mars/badge/?version=latest)](http://mars.readthedocs.org/en/latest/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/github/roblillack/mars/badge.svg?branch=master)](https://coveralls.io/github/roblillack/mars?branch=master)
