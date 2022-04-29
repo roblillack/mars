@@ -15,6 +15,8 @@ A lightweight web toolkit for the [Go language](http://www.golang.org).
 
 Mars is a fork of the fantastic, yet not-that-idiomatic-and-pretty-much-abandoned, [Revel framework](https://github.com/revel/revel). You might take a look at the corresponding documentation for the time being.
 
+**Have a question?** Head over to our [Discussions](https://github.com/roblillack/mars/discussions)! 💬
+
 ## Quick Start
 
 Getting started with Mars is as easy as:
