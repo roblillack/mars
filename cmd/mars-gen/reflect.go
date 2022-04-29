@@ -631,4 +631,5 @@ var builtinTypes = map[string]struct{}{
 	"uint64":     {},
 	"uint8":      {},
 	"uintptr":    {},
+	"any":        {},
 }
