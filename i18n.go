@@ -228,7 +228,7 @@ func setCurrentLocaleControllerArguments(c *Controller, locale string) {
 // quality first in the slice.
 func hasAcceptLanguageHeader(request *Request) (bool, string) {
 	if request.AcceptLanguages != nil && len(request.AcceptLanguages) > 0 {
-		return true, request.AcceptLanguages[0].Language
+		return true, removeAllWhitespace(request.AcceptLanguages[0].Language)
 	}
 
 	return false, ""
@@ -239,7 +239,7 @@ func hasLocaleCookie(request *Request) (bool, string) {
 	if request != nil && request.Cookies() != nil {
 		name := Config.StringDefault(localeCookieConfigKey, CookiePrefix+"_LANG")
 		if cookie, error := request.Cookie(name); error == nil {
-			return true, cookie.Value
+			return true, removeAllWhitespace(cookie.Value)
 		} else {
 			TRACE.Printf("Unable to read locale cookie with name '%s': %s", name, error.Error())
 		}

@@ -29,12 +29,10 @@ func isSafeMethod(c *Controller) bool {
 
 func findCSRFToken(c *Controller) string {
 	if h := c.Request.Header.Get(csrfHeaderName); h != "" {
-		TRACE.Printf("Have header CSRF token: %s\n", h)
 		return h
 	}
 
 	if f := c.Params.Get(csrfFieldName); f != "" {
-		TRACE.Printf("Have form field CSRF token: %s\n", f)
 		return f
 	}
 
@@ -108,9 +106,6 @@ func CSRFFilter(c *Controller, fc []Filter) {
 	if len(csrfToken) != 22 {
 		csrfToken = generateRandomToken()
 		c.Session[csrfCookieKey] = csrfToken
-		TRACE.Printf("Created session token: %s\n", csrfToken)
-	} else {
-		TRACE.Printf("Browser sent session token: %s\n", csrfToken)
 	}
 
 	c.SetCookie(&http.Cookie{
