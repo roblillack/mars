@@ -3,10 +3,23 @@
 All notable changes to Mars will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [Unreleased](https://github.com/roblillack/mars/compare/v1.0.4...master)
+## [Unreleased](https://github.com/roblillack/mars/compare/v1.1.0...master)
 
-- Add unit test for `cert`.
-- Improve code generation to not write redundant type information. #20
+## [v1.1.0](https://github.com/roblillack/mars/compare/v1.0.4...v1.1.0)
+
+- New routing features:
+  - Add support for variable file extensions. #18
+- Security fixes:
+  - Better sanitize some trace logs that might contain user input. #24
+- Improvements to code generation using `mars-gen`:
+  - Add support for generating routes when query parameters of type `any` are used. [94d2c9e]
+  - Improve quality of generated code and `go fmt` it. #21
+- Code quality improvements:
+  - Add support for static code analysis using CodeQL. [b8b7f93]
+  - Add unit test for `cert`. [9fb9184]
+  - Hide some internal data structures. #16 (#22)
+  - Fix test vetting errors. [65ad5a2]
+  - Improve Go 1.18 support, minimum supported Go version is now 1.13. [a03670b]
 
 ## [v1.0.4](https://github.com/roblillack/mars/compare/v1.0.3...v1.0.4)
 
