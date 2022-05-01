@@ -108,7 +108,7 @@ func TestErrorWhileRefreshing(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	if err := w.Notify(); err != nil {
-		t.Errorf("error not resovled yet: %s", err)
+		t.Errorf("error not resolved yet: %s", err)
 	}
 	if !bla.Refreshed {
 		t.Error("Should have been refreshed.")
