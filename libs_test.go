@@ -23,7 +23,7 @@ func TestSignature(t *testing.T) {
 	for n := 0; n < 100; n++ {
 		msg := "Untouchable " + generateRandomToken()
 		sig := Sign(msg)
-		if len(sig) != 40 {
+		if len(sig) != 43 {
 			t.Fatalf("wrong signature length %d for '%s' (sig: '%s')!", len(sig), msg, sig)
 
 		}
