@@ -14,8 +14,11 @@ func Sign(message string) string {
 	if len(secretKey) == 0 {
 		return ""
 	}
+	// mac := hmac.New(sha256.New, secretKey)
 	mac := hmac.New(sha1.New, secretKey)
 	io.WriteString(mac, message)
+	// return base64.StdEncoding.EncodeToString(mac.Sum(nil))
+	// return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
 	return hex.EncodeToString(mac.Sum(nil))
 }
 
@@ -23,4 +26,10 @@ func Sign(message string) string {
 // e.g. it matches what we generate with Sign()
 func Verify(message, sig string) bool {
 	return hmac.Equal([]byte(sig), []byte(Sign(message)))
+	// mac := hmac.New(sha256.New, secretKey)
+	// io.WriteString(mac, message)
+	// hash := mac.Sum(nil)
+
+	// received, _ := hex.DecodeString(sig)
+	// return hmac.Equal(received, hash)
 }
