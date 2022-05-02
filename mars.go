@@ -69,14 +69,6 @@ var (
 	SelfSignedOrganization = "ACME Inc."
 	SelfSignedDomains      = "127.0.0.1"
 
-	// All cookies dropped by the framework begin with this prefix.
-	CookiePrefix = "MARS"
-	// Cookie domain
-	CookieDomain = ""
-	// Cookie flags
-	CookieHttpOnly = false
-	CookieSecure   = false
-
 	// DisableCSRF disables CSRF checking altogether. See CSRFFilter for more information.
 	DisableCSRF = false
 
@@ -100,6 +92,12 @@ var (
 
 	setupDone bool
 )
+
+// All cookies dropped by the framework begin with this prefix.
+var CookiePrefix = "MARS"
+var CookieDomain = ""
+var CookieHttpOnly = true
+var CookieSecure = false
 
 func init() {
 	log.SetFlags(defaultLoggerFlags)
@@ -190,8 +188,10 @@ func InitDefaults(mode, basePath string) {
 	AppRoot = Config.StringDefault("app.root", AppRoot)
 	CookiePrefix = Config.StringDefault("cookie.prefix", CookiePrefix)
 	CookieDomain = Config.StringDefault("cookie.domain", CookieDomain)
+
+	// Enable "secure" flag for cookies whenever HTTPS-only mode is enabled
+	CookieSecure = Config.BoolDefault("cookie.secure", CookieSecure || (HttpSsl && !DualStackHTTP))
 	CookieHttpOnly = Config.BoolDefault("cookie.httponly", CookieHttpOnly)
-	CookieSecure = Config.BoolDefault("cookie.secure", CookieSecure)
 
 	if s := Config.StringDefault("app.secret", ""); s != "" {
 		SetAppSecret(s)
