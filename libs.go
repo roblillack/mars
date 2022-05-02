@@ -2,20 +2,38 @@ package mars
 
 import (
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"io"
 )
 
 var HashAlgorithm = sha256.New
+var HashBlockSize = sha256.BlockSize
 
-// Sign a given string with the app-configured secret key.
-// If no secret key is set, returns the empty string.
-// Return the signature in base64 (URLEncoding).
-func Sign(message string) string {
-	if len(secretKey) == 0 {
-		return ""
+var (
+	// Private
+	secretKey []byte // Key used to sign cookies.
+)
+
+func SetAppSecret(secret string) {
+	secretKey = []byte(secret)
+}
+
+func generateRandomSecretKey() []byte {
+	buf := make([]byte, HashBlockSize)
+	if _, err := rand.Read(buf); err != nil {
+		panic("Unable to generate random application secret")
 	}
+
+	return buf
+}
+
+// Sign a given string with the configured or random secret key.
+// If no secret key is set, returns the empty string.
+// Return the signature in unpadded, URL-safe base64 encoding
+// (A-Z, 0-9, a-z, _ and -).
+func Sign(message string) string {
 	mac := hmac.New(HashAlgorithm, secretKey)
 	io.WriteString(mac, message)
 	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))

@@ -98,15 +98,8 @@ var (
 
 	MaxAge = time.Hour * 24 // MaxAge specifies the time browsers shall cache static content served using Static.Serve
 
-	// Private
-	secretKey []byte // Key used to sign cookies. An empty key disables signing.
-
 	setupDone bool
 )
-
-func SetAppSecret(secret string) {
-	secretKey = []byte(secret)
-}
 
 func init() {
 	log.SetFlags(defaultLoggerFlags)
@@ -218,6 +211,10 @@ func InitDefaults(mode, basePath string) {
 }
 
 func setup() {
+	if secretKey == nil {
+		secretKey = generateRandomSecretKey()
+	}
+
 	// The "watch" config variable can turn on and off all watching.
 	// (As a convenient way to control it all together.)
 	if Config.BoolDefault("watch", DevMode) {
