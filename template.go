@@ -254,7 +254,11 @@ func (loader *TemplateLoader) Refresh() error {
 		var templateWalker func(path string, info os.FileInfo, err error) error
 		templateWalker = func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				ERROR.Println("error walking templates:", err)
+				if os.IsNotExist(err) {
+					WARN.Println("Template directory does not exist.")
+				} else {
+					ERROR.Println("error walking templates:", err)
+				}
 				return nil
 			}
 
