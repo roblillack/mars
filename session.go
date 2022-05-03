@@ -27,11 +27,11 @@ const (
 var expireAfterDuration time.Duration
 
 func init() {
-	// Set expireAfterDuration, default to 30 days if no value in config
+	// Set expireAfterDuration, default to 24 hours if no value in config
 	OnAppStart(func() {
 		var err error
 		if expiresString, ok := Config.String("session.expires"); !ok {
-			expireAfterDuration = 30 * 24 * time.Hour
+			expireAfterDuration = 24 * time.Hour
 		} else if expiresString == "session" {
 			expireAfterDuration = 0
 		} else if expireAfterDuration, err = time.ParseDuration(expiresString); err != nil {
