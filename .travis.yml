@@ -12,7 +12,8 @@ go:
   - 1.16
   - 1.17
   - 1.18
-  - tip
+  - 1.19
+  - master
 
 before_install:
   - go get golang.org/x/tools/cmd/cover@v0.1.10
@@ -22,3 +23,7 @@ before_install:
 
 script:
   - $HOME/gopath/bin/goveralls -service=travis-ci
+
+matrix:
+  allow_failures:
+    - go: master
