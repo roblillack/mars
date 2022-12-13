@@ -3,7 +3,19 @@ package mars
 import (
 	"fmt"
 	"testing"
+
+	"github.com/roblillack/mars/internal/pathtree"
 )
+
+func TestEnsureSecretKeyIsSet(t *testing.T) {
+	secretKey = nil
+	MainTemplateLoader = &TemplateLoader{}
+	MainRouter = &Router{Tree: pathtree.New()}
+	InitDefaults("prod", "")
+	if len(secretKey) == 0 || len(secretKey) != HashBlockSize {
+		t.Fatalf("Not a valid secret key: %+v", secretKey)
+	}
+}
 
 func BenchmarkSigning(b *testing.B) {
 	SetAppSecret("Ludolfs lustige Liegestütze ließen Lolas Lachmuskeln leuchten.")
