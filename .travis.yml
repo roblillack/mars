@@ -12,6 +12,7 @@ go:
   - 1.16
   - 1.17
   - 1.18
+  - 1.19
   - tip
 
 before_install:
@@ -22,3 +23,7 @@ before_install:
 
 script:
   - $HOME/gopath/bin/goveralls -service=travis-ci
+
+matrix:
+  allow_failures:
+    - go: tip
