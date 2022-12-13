@@ -88,6 +88,7 @@ func (s Session) Cookie() *http.Cookie {
 		Domain:   CookieDomain,
 		Path:     "/",
 		HttpOnly: CookieHttpOnly,
+		SameSite: http.SameSiteStrictMode,
 		Secure:   CookieSecure,
 		Expires:  ts.UTC(),
 	}
