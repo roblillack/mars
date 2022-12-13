@@ -11,7 +11,7 @@ func TestEnsureSecretKeyIsSet(t *testing.T) {
 	secretKey = nil
 	MainTemplateLoader = &TemplateLoader{}
 	MainRouter = &Router{Tree: pathtree.New()}
-	InitDefaults("prod", "")
+	setup()
 	if len(secretKey) == 0 || len(secretKey) != HashBlockSize {
 		t.Fatalf("Not a valid secret key: %+v", secretKey)
 	}
