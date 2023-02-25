@@ -7,5 +7,5 @@ require (
 	github.com/codegangsta/cli v1.20.0
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/robfig/config v0.0.0-20141207224736-0f78529c8c7e
-	golang.org/x/net v0.0.0-20200707034311-ab3426394381
+	golang.org/x/net v0.7.0
 )
