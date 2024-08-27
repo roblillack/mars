@@ -3,7 +3,7 @@
 A lightweight web toolkit for the [Go language](http://www.golang.org).
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/roblillack/mars.svg)](https://pkg.go.dev/github.com/roblillack/mars)
-[![Build status](https://github.com/roblillack/mars/actions/workflows/build-and-test.yml/badge.svg?branch=main)](https://github.com/roblillack/mars/actions)
+[![Build status](https://github.com/roblillack/mars/actions/workflows/build-and-test.yml/badge.svg?branch=master)](https://github.com/roblillack/mars/actions)
 [![Documentation Status](https://readthedocs.org/projects/mars/badge/?version=latest)](http://mars.readthedocs.org/en/latest/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/github/roblillack/mars/badge.svg?branch=master)](https://coveralls.io/github/roblillack/mars?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/roblillack/mars)](https://goreportcard.com/report/github.com/roblillack/mars)
