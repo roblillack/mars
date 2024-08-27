@@ -2,16 +2,15 @@
 
 A lightweight web toolkit for the [Go language](http://www.golang.org).
 
-[![GoDoc](http://godoc.org/github.com/roblillack/mars?status.svg)](https://pkg.go.dev/github.com/roblillack/mars)
-[![Build Status](https://travis-ci.com/roblillack/mars.svg?branch=master)](https://travis-ci.com/github/roblillack/mars)
-[![Windows build status](https://ci.appveyor.com/api/projects/status/og951w3majhmd13t/branch/master?svg=true)](https://ci.appveyor.com/project/roblillack/mars/branch/master)
+[![Go Reference](https://pkg.go.dev/badge/github.com/roblillack/mars.svg)](https://pkg.go.dev/github.com/roblillack/mars)
+[![Build status](https://github.com/roblillack/mars/actions/workflows/build-and-test.yml/badge.svg?branch=main)](https://github.com/roblillack/mars/actions)
 [![Documentation Status](https://readthedocs.org/projects/mars/badge/?version=latest)](http://mars.readthedocs.org/en/latest/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/github/roblillack/mars/badge.svg?branch=master)](https://coveralls.io/github/roblillack/mars?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/roblillack/mars)](https://goreportcard.com/report/github.com/roblillack/mars)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 - Latest Mars version: 1.1.0 (released May 1, 2022)
-- Supported Go versions: 1.13 … 1.21
+- Supported Go versions: 1.13 … 1.23
 
 Mars is a fork of the fantastic, yet not-that-idiomatic-and-pretty-much-abandoned, [Revel framework](https://github.com/revel/revel). You might take a look at the corresponding documentation for the time being.
 
