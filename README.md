@@ -11,7 +11,7 @@ A lightweight web toolkit for the [Go language](http://www.golang.org).
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 - Latest Mars version: 1.1.0 (released May 1, 2022)
-- Supported Go versions: 1.13 … 1.21
+- Supported Go versions: 1.13 … 1.23
 
 Mars is a fork of the fantastic, yet not-that-idiomatic-and-pretty-much-abandoned, [Revel framework](https://github.com/revel/revel). You might take a look at the corresponding documentation for the time being.
 
