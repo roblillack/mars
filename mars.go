@@ -69,14 +69,6 @@ var (
 	SelfSignedOrganization = "ACME Inc."
 	SelfSignedDomains      = "127.0.0.1"
 
-	// All cookies dropped by the framework begin with this prefix.
-	CookiePrefix = "MARS"
-	// Cookie domain
-	CookieDomain = ""
-	// Cookie flags
-	CookieHttpOnly = false
-	CookieSecure   = false
-
 	// DisableCSRF disables CSRF checking altogether. See CSRFFilter for more information.
 	DisableCSRF = false
 
@@ -98,15 +90,14 @@ var (
 
 	MaxAge = time.Hour * 24 // MaxAge specifies the time browsers shall cache static content served using Static.Serve
 
-	// Private
-	secretKey []byte // Key used to sign cookies. An empty key disables signing.
-
 	setupDone bool
 )
 
-func SetAppSecret(secret string) {
-	secretKey = []byte(secret)
-}
+// All cookies dropped by the framework begin with this prefix.
+var CookiePrefix = "MARS"
+var CookieDomain = ""
+var CookieHttpOnly = true
+var CookieSecure = false
 
 func init() {
 	log.SetFlags(defaultLoggerFlags)
@@ -190,8 +181,10 @@ func Init(mode string) {
 	AppRoot = Config.StringDefault("app.root", AppRoot)
 	CookiePrefix = Config.StringDefault("cookie.prefix", CookiePrefix)
 	CookieDomain = Config.StringDefault("cookie.domain", CookieDomain)
+
+	// Enable "secure" flag for cookies whenever HTTPS-only mode is enabled
+	CookieSecure = Config.BoolDefault("cookie.secure", CookieSecure || (HttpSsl && !DualStackHTTP))
 	CookieHttpOnly = Config.BoolDefault("cookie.httponly", CookieHttpOnly)
-	CookieSecure = Config.BoolDefault("cookie.secure", CookieSecure)
 }
 
 // InitDefaults initializes Mars based on runtime-loading of config files.
@@ -221,6 +214,14 @@ func Setup() {
 	INFO = getLogger("info", INFO)
 	WARN = getLogger("warn", WARN)
 	ERROR = getLogger("error", ERROR)
+
+	setup()
+}
+
+func setup() {
+	if secretKey == nil {
+		secretKey = generateRandomSecretKey()
+	}
 
 	// The "watch" config variable can turn on and off all watching.
 	// (As a convenient way to control it all together.)

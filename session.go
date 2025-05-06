@@ -27,11 +27,11 @@ const (
 var expireAfterDuration time.Duration
 
 func init() {
-	// Set expireAfterDuration, default to 30 days if no value in config
+	// Set expireAfterDuration, default to 24 hours if no value in config
 	OnAppStart(func() {
 		var err error
 		if expiresString, ok := Config.String("session.expires"); !ok {
-			expireAfterDuration = 30 * 24 * time.Hour
+			expireAfterDuration = 24 * time.Hour
 		} else if expiresString == "session" {
 			expireAfterDuration = 0
 		} else if expireAfterDuration, err = time.ParseDuration(expiresString); err != nil {
@@ -84,7 +84,7 @@ func (s Session) Cookie() *http.Cookie {
 	sessionData := url.QueryEscape(sessionValue)
 	return &http.Cookie{
 		Name:     CookiePrefix + "_SESSION",
-		Value:    Sign(sessionData) + "-" + sessionData,
+		Value:    Sign(sessionData) + "/" + sessionData,
 		Domain:   CookieDomain,
 		Path:     "/",
 		HttpOnly: CookieHttpOnly,
@@ -113,11 +113,11 @@ func GetSessionFromCookie(cookie *http.Cookie) Session {
 	session := make(Session)
 
 	// Separate the data from the signature.
-	hyphen := strings.Index(cookie.Value, "-")
-	if hyphen == -1 || hyphen >= len(cookie.Value)-1 {
+	sep := strings.Index(cookie.Value, "/")
+	if sep == -1 || sep >= len(cookie.Value)-1 {
 		return session
 	}
-	sig, data := cookie.Value[:hyphen], cookie.Value[hyphen+1:]
+	sig, data := cookie.Value[:sep], cookie.Value[sep+1:]
 
 	// Verify the signature.
 	if !Verify(data, sig) {
