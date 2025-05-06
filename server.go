@@ -107,7 +107,7 @@ func initGracefulShutdown() {
 
 func Run() {
 	if !setupDone {
-		setup()
+		Setup()
 	}
 
 	if DevMode {

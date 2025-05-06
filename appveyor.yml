@@ -1,9 +1,0 @@
-build: off
-
-stack: go 1.16
-
-before_test:
-  - go vet ./...
-
-test_script:
-  - go test ./...

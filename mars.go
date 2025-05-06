@@ -103,19 +103,12 @@ func init() {
 	log.SetFlags(defaultLoggerFlags)
 }
 
-// InitDefaults initializes Mars based on runtime-loading of config files.
-//
-// Params:
-//   mode - the run mode, which determines which app.conf settings are used.
-//   basePath - the path to the configuration, messages, and view directories
-func InitDefaults(mode, basePath string) {
+func Init(mode string) {
 	RunMode = mode
 
 	if runtime.GOOS == "windows" {
 		gocolorize.SetPlain(true)
 	}
-
-	BasePath = filepath.FromSlash(basePath)
 
 	var cfgPath string
 	if filepath.IsAbs(ConfigFile) {
@@ -192,7 +185,22 @@ func InitDefaults(mode, basePath string) {
 	// Enable "secure" flag for cookies whenever HTTPS-only mode is enabled
 	CookieSecure = Config.BoolDefault("cookie.secure", CookieSecure || (HttpSsl && !DualStackHTTP))
 	CookieHttpOnly = Config.BoolDefault("cookie.httponly", CookieHttpOnly)
+}
 
+// InitDefaults initializes Mars based on runtime-loading of config files.
+//
+// Params:
+//
+//	mode - the run mode, which determines which app.conf settings are used.
+//	basePath - the path to the configuration, messages, and view directories
+func InitDefaults(mode, basePath string) {
+	BasePath = filepath.FromSlash(basePath)
+	Init(mode)
+}
+
+// Setup sets up the Mars framework and any custom components by running the
+// startup hooks and setting up the views and router.
+func Setup() {
 	if s := Config.StringDefault("app.secret", ""); s != "" {
 		SetAppSecret(s)
 	}

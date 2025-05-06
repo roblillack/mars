@@ -103,6 +103,5 @@ func startFakeBookingApp() {
 	ERROR = TRACE
 
 	InitDefaults("prod", "testdata")
-
-	runStartupHooks()
+	Setup()
 }
